@@ -1,7 +1,8 @@
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QSizePolicy, QPushButton
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QSizePolicy, QPushButton,\
+QFileDialog, QLabel
+
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -12,7 +13,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 
-#import fileDialogWin
+import fileDialogWin
 
 
 class App(QMainWindow):
@@ -30,67 +31,88 @@ class App(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        m=PlotCanvas(self, width=6.9, height=4.5)
-        m.move(15,40)
+        m = PlotCanvas(self, width=6.9, height=4.5)
+        m.move(15, 40)
 
         button1=QPushButton('Open file', self)
         button1.setToolTip('Click to open data file')
         button1.move(15,7)
         button1.resize(72,26)
-        #button1.clicked.connect(self.file_fcn)
+        button1.clicked.connect(self.file_fcn)
+
+        label1=QLabel('Data channel',self)
+        label1.move(443,501)
+        label1.resize=(50,27)
+
 
         kanal=QLineEdit('',self)
         kanal.setToolTip('Enter data channel')
         kanal.move(525,500)
         kanal.resize(100,30)
 
-        button2=QPushButton('Next',self)
-        button2.move(633,501)
-        button2.resize(72,27)
+        button2 = QPushButton('Next', self)
+        button2.move(630,501)
+        button2.resize(75,27)
+        button2.clicked.connect(self.btn_fcn)
 
         self.show()
 
-    #def file_fcn(self):
-    #   fileDialogWin
+    def file_fcn(self):
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(self, "Otevřít soubor - zpracování XRD dat", "",
+                                                  "Data Files (*.dat);;All Files (*)", options=options)
+        if fileName:
+           data = np.genfromtxt(fileName)
+           print(data.shape)
+        self.show()
+
+    def btn_fcn(self):
+        k = int(self.kanal.text())
+        print(k)
+
+
+
+
+
 
 class PlotCanvas(FigureCanvas):
 
-    def __init__(self, parent=None, width=10, height=8, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
+        def __init__(self, parent=None, width=10, height=8, dpi=100):
 
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
+            fig = Figure(figsize=(width, height), dpi=dpi)
+            self.axes = fig.add_subplot(111)
 
-        FigureCanvas.setSizePolicy(self,
+            FigureCanvas.__init__(self, fig)
+            self.setParent(parent)
+
+            FigureCanvas.setSizePolicy(self,
                                    QSizePolicy.Expanding,
                                    QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-        self.plot()
+            FigureCanvas.updateGeometry(self)
+            self.plot()
 
-    def plot(self):
-        #prozatimni reseni - zde nahravam datovy soubor
-        import os
-        os.chdir('F:\\') 
-        data=np.genfromtxt('testovaci.dat',delimiter='\t')
-       
-        row=data.shape[0]
-        col=data.shape[1]
-        data = data[:, 7:col]
-        x=np.arange(0, col - 7, 1)
-        y=np.arange(0, row, 1)
-        
-        ax=self.figure.gca(projection='3d')
-        ax.set_title('filename.dat')
+        def plot(self):
+               import os
+               os.chdir('F:\\')
+               data = np.genfromtxt('testovaci.dat',delimiter='\t')
 
-        x,y=np.meshgrid(x,y)
-        surf=ax.plot_surface(x,y,data, cmap=cm.gist_stern,
-                               linewidth=0, antialiased=False, vmin=np.amin(data), vmax=np.amax(data))
 
-        self.figure.colorbar(surf)
+               print(data.shape)
+               row = data.shape[0]
+               col = data.shape[1]
+               data = data[:, 7:col]
+               x = np.arange(0, col - 7, 1)
+               y = np.arange(0, row, 1)
+               ax = self.figure.gca(projection='3d')
+               ax.set_title('filename.dat')
 
-        self.draw()
+               x, y = np.meshgrid(x, y)
+               surf = ax.plot_surface(x, y, data, cmap=cm.gist_stern,
+                                      linewidth=0, antialiased=False, vmin=np.amin(data), vmax=np.amax(data))
 
+               self.figure.colorbar(surf)
+
+               self.draw()
 
 
 if __name__ == '__main__':
