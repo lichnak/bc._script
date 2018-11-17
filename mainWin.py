@@ -21,6 +21,9 @@ class App(QMainWindow):
         self.title = 'XRD data processing'
         self.width = 720
         self.height = 560
+
+        self.kanal=QLineEdit('',self)
+        self.moje_promenna = "neco"
         self.initUI()
 
     def initUI(self):
@@ -29,6 +32,10 @@ class App(QMainWindow):
 
         m = PlotCanvas(self, width=6.9, height=4.5)
         m.move(15, 40)
+
+        self.kanal.setToolTip('Enter data channel')
+        self.kanal.move(525, 500)
+        self.kanal.resize(100, 30)
 
         button1=QPushButton('Open file', self)
         button1.setToolTip('Click to open data file')
@@ -40,10 +47,7 @@ class App(QMainWindow):
         label1.move(443,501)
         label1.resize=(50,27)
 
-        kanal=QLineEdit('',self)
-        kanal.setToolTip('Enter data channel')
-        kanal.move(525,500)
-        kanal.resize(100,30)
+
 
         button2 = QPushButton('Next', self)
         button2.move(630,501)
@@ -63,8 +67,13 @@ class App(QMainWindow):
         self.show()
 
     def btn_fcn(self):
-        k = int(self.kanal.text())
-        print(k)
+        try:
+            k =int(self.kanal.text())
+            print(k)
+        except ValueError:
+            print("not a number")
+        self.moje_promenna = "neco jinyho"
+        print(self.moje_promenna)
 
         
 class PlotCanvas(FigureCanvas):
@@ -86,7 +95,7 @@ class PlotCanvas(FigureCanvas):
 
         def plot(self):
                import os
-               os.chdir('F:\\')
+               #os.chdir('F:\\')
                data = np.genfromtxt('testovaci.dat',delimiter='\t')
                row = data.shape[0]
                col = data.shape[1]
