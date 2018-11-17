@@ -3,7 +3,6 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QSizePolicy, QPushButton,\
 QFileDialog, QLabel
 
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
@@ -11,9 +10,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
-
-
-import fileDialogWin
 
 
 class App(QMainWindow):
@@ -44,7 +40,6 @@ class App(QMainWindow):
         label1.move(443,501)
         label1.resize=(50,27)
 
-
         kanal=QLineEdit('',self)
         kanal.setToolTip('Enter data channel')
         kanal.move(525,500)
@@ -57,6 +52,7 @@ class App(QMainWindow):
 
         self.show()
 
+        
     def file_fcn(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Otevřít soubor - zpracování XRD dat", "",
@@ -70,11 +66,7 @@ class App(QMainWindow):
         k = int(self.kanal.text())
         print(k)
 
-
-
-
-
-
+        
 class PlotCanvas(FigureCanvas):
 
         def __init__(self, parent=None, width=10, height=8, dpi=100):
@@ -90,14 +82,12 @@ class PlotCanvas(FigureCanvas):
                                    QSizePolicy.Expanding)
             FigureCanvas.updateGeometry(self)
             self.plot()
+            
 
         def plot(self):
                import os
                os.chdir('F:\\')
                data = np.genfromtxt('testovaci.dat',delimiter='\t')
-
-
-               print(data.shape)
                row = data.shape[0]
                col = data.shape[1]
                data = data[:, 7:col]
@@ -109,7 +99,6 @@ class PlotCanvas(FigureCanvas):
                x, y = np.meshgrid(x, y)
                surf = ax.plot_surface(x, y, data, cmap=cm.gist_stern,
                                       linewidth=0, antialiased=False, vmin=np.amin(data), vmax=np.amax(data))
-
                self.figure.colorbar(surf)
 
                self.draw()
