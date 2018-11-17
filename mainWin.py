@@ -75,6 +75,7 @@ class App(QMainWindow):
         self.moje_promenna = "neco jinyho"
         print(self.moje_promenna)
 
+
         
 class PlotCanvas(FigureCanvas):
 
