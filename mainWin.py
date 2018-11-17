@@ -69,17 +69,17 @@ class PlotCanvas(FigureCanvas):
         self.plot()
 
     def plot(self):
+        #prozatimni reseni - zde nahravam datovy soubor
         import os
-        os.chdir('F:\\')
+        os.chdir('F:\\') 
         data=np.genfromtxt('testovaci.dat',delimiter='\t')
-        print(data.shape)
+       
         row=data.shape[0]
         col=data.shape[1]
         data = data[:, 7:col]
         x=np.arange(0, col - 7, 1)
         y=np.arange(0, row, 1)
-        print(x.shape)
-        print(y.shape)
+        
         ax=self.figure.gca(projection='3d')
         ax.set_title('filename.dat')
 
