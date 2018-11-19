@@ -88,28 +88,6 @@ class App(QMainWindow):
 
         self.show()
 
-    # def file_fcn(self):
-    #     options = QFileDialog.Options()
-    #     self.fileName, _ = QFileDialog.getOpenFileName(self, "Otevřít soubor - zpracování XRD dat", "",
-    #                                                     "Data Files (*.dat);;All Files (*)", options=options)
-    #     if self.fileName:
-    #         self.data = np.genfromtxt(self.fileName)
-    #         self.label1.setText(" Current file:   "+str(self.fileName))
-    #     self.show()
-    #     self.m.plotit(self.data)
-
-    # def btn_fcn(self):
-    #     try:
-    #         k = int(self.kanal.text())
-    #     except ValueError:
-    #         print("Not a number")
-    #     self.my_channel = k
-    #     print("Value: "+str(self.my_channel))
-    #     #self.newWin()
-
-    #def newWin(self, my_channel):
-    #filterWin
-
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=7.05, height=4, dpi=100):
@@ -126,28 +104,28 @@ class PlotCanvas(FigureCanvas):
 
 
 
-    def plotit(self, data_plt):
-        self.data = data_plt
-        ax = self.figure.add_subplot(111)
-        ax.plot(data_plt)
-        row = data_plt.shape[0]
-        col = data_plt.shape[1]
-        data_plt = data_plt[:, 7:col]
-        x = np.arange(0, col - 7, 1)
-        y = np.arange(0, row, 1)
+#     def plotit(self, data_plt):
+#         self.data = data_plt
+#         ax = self.figure.add_subplot(111)
+#         ax.plot(data_plt)
+#         row = data_plt.shape[0]
+#         col = data_plt.shape[1]
+#         data_plt = data_plt[:, 7:col]
+#         x = np.arange(0, col - 7, 1)
+#         y = np.arange(0, row, 1)
 
-        ax = self.figure.gca(projection='3d')
-        x, y = np.meshgrid(x, y)
-        surf = ax.plot_surface(x, y, data_plt, cmap=cm.gist_stern, linewidth=0, antialiased=False, vmin=np.amin(data_plt), vmax=np.amax(data_plt))
+#         ax = self.figure.gca(projection='3d')
+#         x, y = np.meshgrid(x, y)
+#         surf = ax.plot_surface(x, y, data_plt, cmap=cm.gist_stern, linewidth=0, antialiased=False, vmin=np.amin(data_plt), vmax=np.amax(data_plt))
 
-        self.figure.colorbar(surf)
+#         self.figure.colorbar(surf)
 
 
-        ax.set_xlabel('Theta (° )')
-        ax.set_ylabel('Time (s)')
-        ax.set_zlabel('Intensity ()')
+#         ax.set_xlabel('Theta (° )')
+#         ax.set_ylabel('Time (s)')
+#         ax.set_zlabel('Intensity ()')
 
-        self.draw()
+#         self.draw()
 
 
 if __name__ == '__main__':
