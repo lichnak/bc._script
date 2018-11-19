@@ -40,11 +40,11 @@ sg = signal.savgol_filter(r, 301, 2) #Savitzky-Golay
 mf = signal.medfilt(r, 501) #Median filter
 
 # plots
-ax.plot(s, r, linewidth=0.5, c='r')
-#ax.plot(s, f, 'k')
-#ax.plot(s, sg, 'g')
+ax.plot(s, r, linewidth=0.3, c='r')
+ax.plot(s, f, 'k')
+ax.plot(s, sg, 'g')
 ax.plot(s, mf, 'b')
-#ax.legend(['Original data', 'Filtfilt', 'Savitzky-Golay'])
+ax.legend(['Original data', 'Filtfilt', 'Savitzky-Golay', 'Median filter'])
 ax.set_title('Data filtration in Python')
 ax.set_xlabel('Time (s)')
 ax.set_ylabel('Intensity ()')
