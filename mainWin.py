@@ -60,11 +60,13 @@ class App(QMainWindow):
 
               self.fig = plt.Figure(figsize=(10, 8))
               self.axes = self.fig.add_subplot(111)
+              self.axes.plot(self.data, 'r')
               self.canvas = FigureCanvas(self.fig)
               self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
               self.canvas.updateGeometry()
               self.canvas.move(15, 40)
-
+              
+              self.canvas.draw()
               self.plotit(self.data)
 
               self.show()
