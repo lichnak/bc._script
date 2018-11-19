@@ -5,6 +5,7 @@ QFileDialog, QLabel, QHBoxLayout
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
@@ -19,57 +20,60 @@ class App(QMainWindow):
         super().__init__()
         self.left = 10
         self.top = 10
-        self.title = 'XRD data processing'
+        self.title = 'XRD data filtering'
         self.width = 720
-        self.height = 560
+        self.height = 540
 
         self.button1 = QPushButton('Open file', self)
-        self.label1 = QLabel('Data channel', self)
+        self.label1 = QLabel('', self)
+        self.label2 = QLabel('Data channel', self)
         self.kanal = QLineEdit('', self)
         self.button2 = QPushButton('Next', self)
 
         self.hboxLayout = QHBoxLayout(self)
 
-        self.data = ''
+        self.m = PlotCanvas(self, width=6.9, height=4.5)
+        self.m.move(15, 40)
+        self.tools = NavigationToolbar(self.m, self)
+        self.tools.move(15, 500)
+        self.tools.resize(415, 30)
+
+        #self.mainMenu = self.menuBar()
+        #self.mainMenu.setNativeMenuBar(False)
+        #self.fileMenu = self.mainMenu.addMenu('File')
+        #self.helpMenu = self.mainMenu.addMenu('About')
 
         self.initUI()
 
     def initUI(self):
-              self.setWindowTitle(self.title)
-              self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
 
-              self.button1.setToolTip('Click to open data file')
-              self.button1.move(15, 7)
-              self.button1.resize(72, 26)
-              self.button1.clicked.connect(self.file_fcn)
+        self.button1.setToolTip('Click to open data file')
+        self.button1.move(15, 7)
+        self.button1.resize(72, 26)
+        self.button1.clicked.connect(self.file_fcn)
 
-              self.label1.move(443, 501)
-              self.label1.resize = (50, 27)
+        self.label1.move(100, 6)
+        self.label1.resize = (600, 27)
+        self.label1.setText(" Current file:  None ")
 
-              self.kanal.setToolTip('Enter data channel')
-              self.kanal.move(525, 500)
-              self.kanal.resize(100, 30)
+        self.label2.move(450, 501)
+        self.label2.resize = (48, 27)
 
-              self.button2.move(630, 501)
-              self.button2.resize(75, 27)
-              self.button2.clicked.connect(self.btn_fcn)
+        self.kanal.setToolTip('Enter data channel')
+        self.kanal.move(525, 500)
+        self.kanal.resize(100, 30)
 
-              self.hboxLayout.addWidget(self.label1)
-              self.hboxLayout.addWidget(self.kanal)
-              self.hboxLayout.addWidget(self.button2)
+        self.button2.move(630, 501)
+        self.button2.resize(75, 27)
+        self.button2.clicked.connect(self.btn_fcn)
 
-              self.fig = plt.Figure(figsize=(10, 8))
-              self.axes = self.fig.add_subplot(111)
-              self.axes.plot(self.data, 'r')
-              self.canvas = FigureCanvas(self.fig)
-              self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-              self.canvas.updateGeometry()
-              self.canvas.move(15, 40)
-              
-              self.canvas.draw()
-              self.plotit(self.data)
+        self.hboxLayout.addWidget(self.label2)
+        self.hboxLayout.addWidget(self.kanal)
+        self.hboxLayout.addWidget(self.button2)
 
-              self.show()
+        self.show()
 
     def file_fcn(self):
         options = QFileDialog.Options()
@@ -77,36 +81,9 @@ class App(QMainWindow):
                                                         "Data Files (*.dat);;All Files (*)", options=options)
         if self.fileName:
             self.data = np.genfromtxt(self.fileName)
-
+            self.label1.setText(" Current file:   "+str(self.fileName))
         self.show()
-        self.plotit(self.data)
-
-    def plotit(self,data):
-        try:
-            if data:
-                row = self.data.shape[0]
-                col = self.data.shape[1]
-                self.data = data[:, 7:col]
-                x = np.arange(0, col - 7, 1)
-                y = np.arange(0, row, 1)
-
-                ax = self.figure.gca(projection='3d')
-                x, y = np.meshgrid(x, y)
-                surf = ax.plot_surface(x, y, self.data, cmap=cm.gist_stern,
-                               linewidth=0, antialiased=False, vmin=np.amin(self.data), vmax=np.amax(self.data))
-                self.figure.colorbar(surf)
-
-                ax.set_title(str(self.fileName))
-                ax.set_xlabel('Temperature (°C)')
-                ax.set_ylabel('Time (s)')
-                ax.set_zlabel('Intensity ()')
-
-                self.canvas.draw()
-
-
-        except ValueError:
-
-                self.canvas.draw()
+        self.m.plotit(self.data)
 
     def btn_fcn(self):
         try:
@@ -121,7 +98,43 @@ class App(QMainWindow):
     #filterWin
 
 
+class PlotCanvas(FigureCanvas):
+    def __init__(self, parent=None, width=6.9, height=4.5, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
 
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+
+
+    def plotit(self, data_plt):
+        self.data = data_plt
+        ax = self.figure.add_subplot(111)
+        ax.plot(data_plt)
+        row = data_plt.shape[0]
+        col = data_plt.shape[1]
+        data_plt = data_plt[:, 7:col]
+        x = np.arange(0, col - 7, 1)
+        y = np.arange(0, row, 1)
+
+        ax = self.figure.gca(projection='3d')
+        x, y = np.meshgrid(x, y)
+        surf = ax.plot_surface(x, y, data_plt, cmap=cm.gist_stern, linewidth=0, antialiased=False, vmin=np.amin(data_plt), vmax=np.amax(data_plt))
+
+        self.figure.colorbar(surf)
+
+
+        ax.set_xlabel('Theta (° )')
+        ax.set_ylabel('Time (s)')
+        ax.set_zlabel('Intensity ()')
+
+        self.draw()
 
 
 if __name__ == '__main__':
