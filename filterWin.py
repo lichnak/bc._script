@@ -70,21 +70,22 @@ class App(QMainWindow):
         self.slide1.move(300, 441)
         self.slide1.setRange(9, 999)
         self.slide1.setToolTip('Window length')
-
+        self.slide1.setSingleStep(1)
+        self.slide1.setTickInterval(100)
+        self.slide1.setTickPosition(QSlider.TicksBelow)
+        self.slide1.setFocusPolicy(Qt.StrongFocus)
+        
         self.label4.move(200, 472)
         self.label4.resize(80, 26)
         self.rad4.move(170, 472)
         self.rad4.setChecked(True)
         self.slide2.move(300, 472)
-        self.slide2.setRange(9, 999)
+        self.slide2.setRange(0, 99)
         self.slide2.setToolTip('Alpha parameter')
         self.slide2.setSingleStep(1)
-        self.slide2.setTickInterval(50)
+        self.slide2.setTickInterval(10)
         self.slide2.setTickPosition(QSlider.TicksBelow)
         self.slide2.setFocusPolicy(Qt.StrongFocus)
-
-
-
 
         self.show()
 
