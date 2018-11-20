@@ -13,14 +13,15 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
-#import filterWin ...externi okno pro filtraci dat ve vybranem kanalu
+from filterWin import Filtrace
+#...externi okno pro filtraci dat ve vybranem kanalu
 
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.left = 10
         self.top = 10
-        self.title = 'XRD data filtering'
+        self.title = 'XRD data processing'
         self.width = 720
         self.height = 540
 
@@ -38,16 +39,12 @@ class App(QMainWindow):
         self.tools.move(15, 500)
         self.tools.resize(415, 30)
 
-        #self.mainMenu = self.menuBar()
-        #self.mainMenu.setNativeMenuBar(False)
-        #self.fileMenu = self.mainMenu.addMenu('File')
-        #self.helpMenu = self.mainMenu.addMenu('About')
-
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setMaximumSize(720, 540)
 
         self.button1.setToolTip('Click to open data file')
         self.button1.move(15, 7)
@@ -55,10 +52,11 @@ class App(QMainWindow):
         self.button1.clicked.connect(self.file_fcn)
 
         self.label1.move(100, 6)
-        self.label1.resize = (600, 27)
         self.label1.setText(" Current file:  None ")
+        self.label1.setMinimumWidth(600)
+        self.label1.setMaximumHeight(27)
 
-        self.label2.move(450, 501)
+        self.label2.move(450, 500)
         self.label2.resize = (48, 27)
 
         self.kanal.setToolTip('Enter data channel')
@@ -92,10 +90,13 @@ class App(QMainWindow):
             print("Not a number")
         self.my_channel = k
         print("Value: "+str(self.my_channel))
-        #self.newWin()
+        self.newWin(self.data, self.my_channel)
 
-    #def newWin(self, my_channel):
-    #filterWin
+    def newWin(self, data, channel):
+        self.data = data
+        self.my_channel = channel
+        Filtrace(data, channel)
+        self.show()
 
 
 class PlotCanvas(FigureCanvas):
@@ -117,6 +118,7 @@ class PlotCanvas(FigureCanvas):
         self.data = data_plt
         ax = self.figure.add_subplot(111)
         ax.plot(data_plt)
+        ax.autoscale(enable=True, axis='x, y', tight=bool)
         row = data_plt.shape[0]
         col = data_plt.shape[1]
         data_plt = data_plt[:, 7:col]
