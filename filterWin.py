@@ -21,7 +21,7 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 # from mainWin import my_channel
 # import random
 
-class App(QMainWindow):
+class Filtrace(QMainWindow):
     def __init__(self):
         super().__init__()
         self.left = 10
@@ -96,7 +96,7 @@ class App(QMainWindow):
         self.rad1.setChecked(False)
         self.rad1.toggled.connect(lambda: self.m.rad1click(self.data, self.my_channel))
         self.rad2.setChecked(False)
-        self.rad2.toggled.connect(lambda: self.m.rad2click(self.data, self.my_channel))
+        self.rad2.toggled.connect(lambda: self.m.rad2click(self.data, self.my_channel, self.position))
         self.rad3.setChecked(False)
         self.rad4.setChecked(False)
 
@@ -109,6 +109,7 @@ class App(QMainWindow):
         self.slide1.setTickInterval(100)
         self.slide1.setTickPosition(QSlider.TicksBelow)
         self.slide1.setFocusPolicy(Qt.StrongFocus)
+        self.slide1.valueChanged.connect(self.slide1_fcn())
 
         self.slide2.move(300, 472)
         self.slide2.setMaximumWidth(110)
@@ -152,6 +153,9 @@ class App(QMainWindow):
     def b3_fcn(self, fig):
         self.m.figure = fig
         fig.savefig('filename.png')
+
+    # def slide1_fcn(self):
+        # self.position = self.slide1.getSliderPosition
 
 
 class PlotCanvas(FigureCanvas):
@@ -245,9 +249,10 @@ class PlotCanvas(FigureCanvas):
 
         self.draw()
 
-    def rad3click(self, data_plt, channel):
+    def rad3click(self, data_plt, channel, win):
         # median filter
         self.figure.clear()
+        self.position = win
         self.my_channel = channel
         self.data = data_plt
 
@@ -275,5 +280,5 @@ class PlotCanvas(FigureCanvas):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = App()
+    ex = Filtrace()
     sys.exit(app.exec_())
