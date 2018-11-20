@@ -109,7 +109,7 @@ class Filtrace(QMainWindow):
         self.slide1.setTickInterval(100)
         self.slide1.setTickPosition(QSlider.TicksBelow)
         self.slide1.setFocusPolicy(Qt.StrongFocus)
-        self.slide1.valueChanged.connect(self.slide1_fcn())
+#         self.slide1.valueChanged.connect(self.slide1_fcn())
 
         self.slide2.move(300, 472)
         self.slide2.setMaximumWidth(110)
@@ -120,6 +120,7 @@ class Filtrace(QMainWindow):
         self.slide2.setTickInterval(10)
         self.slide2.setTickPosition(QSlider.TicksBelow)
         self.slide2.setFocusPolicy(Qt.StrongFocus)
+#         self.slide2.valueChanged.connect(self.slide2_fcn())
 
         ###button1 - .csv
         self.b1.setToolTip('Click to save data to .csv file')
@@ -155,7 +156,10 @@ class Filtrace(QMainWindow):
         fig.savefig('filename.png')
 
     # def slide1_fcn(self):
-        # self.position = self.slide1.getSliderPosition
+        # self.position = self.slide1.getSliderPosition ##win --> median filter
+        
+    # def slide2_fcn(self):
+        # self.position = self.slide1.getSliderPosition ##alpha --> exponential smoothing filter
 
 
 class PlotCanvas(FigureCanvas):
