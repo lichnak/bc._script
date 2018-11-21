@@ -131,7 +131,7 @@ class PlotCanvas(FigureCanvas):
 
         self.figure.colorbar(surf)
 
-        ax.set_xlabel('Theta (° )')
+        ax.set_xlabel('Theta (deg)')
         ax.set_ylabel('Time (s)')
         ax.set_zlabel('Intensity ()')
 
