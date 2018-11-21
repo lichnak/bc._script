@@ -280,6 +280,42 @@ class PlotCanvas(FigureCanvas):
         self.dat = mf
 
         self.draw()
+    
+    def rad4click(self, data_plt, channel, win):
+        # exponential moving average
+        self.figure.clear()
+        self.win = win
+        self.my_channel = channel
+        self.data = data_plt
+
+        ax = self.figure.add_subplot(111)
+        ax.autoscale(enable=True, axis='x', tight=bool)
+
+        row = data_plt.shape[0]
+        col = data_plt.shape[1]
+        data_plt = data_plt[:, 7:col]
+
+        r = data_plt[:, 149]
+        s = np.arange(0, row, 1)
+
+        def EMA(data, winSize):
+            weights = np.exp(np.linspace(-1., 0, winSize))
+            weights /= weights.sum()
+
+            a = np.convolve(data, weights)[:len(data)]
+            return a
+
+        ema = EMA(r, win)
+
+        ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
+        ax.plot(s, ema, linewidth=2.0, c='y')
+
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Intensity ()')
+
+        self.dat = ema
+
+        self.draw()
 
 
 if __name__ == '__main__':
