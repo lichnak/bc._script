@@ -14,7 +14,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 from filterWin import Filtrace
-#...externi okno pro filtraci dat ve vybranem kanalu
+
 
 class App(QMainWindow):
     def __init__(self):
@@ -99,9 +99,7 @@ class App(QMainWindow):
         self.my_channel = k
         self.newWin(self.data, self.my_channel)
 
-
-
-
+        
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=6.9, height=4.5, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
@@ -115,8 +113,7 @@ class PlotCanvas(FigureCanvas):
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-
-
+        
     def plotit(self, data_plt):
         self.data = data_plt
         ax = self.figure.add_subplot(111)
@@ -133,7 +130,6 @@ class PlotCanvas(FigureCanvas):
         surf = ax.plot_surface(x, y, data_plt, cmap=cm.gist_stern, linewidth=0, antialiased=False, vmin=np.amin(data_plt), vmax=np.amax(data_plt))
 
         self.figure.colorbar(surf)
-
 
         ax.set_xlabel('Theta (° )')
         ax.set_ylabel('Time (s)')
