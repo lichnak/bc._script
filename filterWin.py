@@ -45,7 +45,7 @@ class Filtrace(QMainWindow):
         self.rad2 = QRadioButton("&Savitzky-Golay")
         self.rad3 = QRadioButton("&Median")
         self.rad4 = QRadioButton("&Exponential smoothing")
-        self.slide1 = QSlider(Qt.Horizontal)
+        self.slide1 = QSlider(Qt.Horizontal, self)
         self.slide2 = QSlider(Qt.Horizontal)
 
         self.b1 = QPushButton('Save data as .csv', self)
@@ -112,7 +112,7 @@ class Filtrace(QMainWindow):
         self.slide1.setTickInterval(100)
         self.slide1.setTickPosition(QSlider.TicksBelow)
         self.slide1.setFocusPolicy(Qt.StrongFocus)
-#         self.slide1.valueChanged.connect(self.slide1_fcn())
+        self.slide1.valueChanged[int].connect(self.slide1_fcn)
 
         self.slide2.move(300, 472)
         self.slide2.setMaximumWidth(110)
@@ -158,7 +158,8 @@ class Filtrace(QMainWindow):
         self.m.figure = fig
         fig.savefig('filename.png')
 
-    # def slide1_fcn(self):
+    def slide1_fcn(self):
+        print(self.slide1.value())
         # self.position = self.slide1.getSliderPosition ##win --> median filter
         
     # def slide2_fcn(self):
