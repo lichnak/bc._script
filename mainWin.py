@@ -83,22 +83,23 @@ class App(QMainWindow):
         self.show()
         self.m.plotit(self.data)
 
-    def btn_fcn(self):
-        try:
-            k = int(self.kanal.text())
-        except ValueError:
-            print("Not a number")
-        self.my_channel = k
-        print("Value: "+str(self.my_channel))
-        self.newWin(self.data, self.my_channel)
-
     def newWin(self, data, channel):
         self.data = data
         self.my_channel = channel
-        print("pred Filtraci passed")
-        nove_okno = Filtrace(data, channel, self)
-        print("Filtrace passed")
-        nove_okno.show()
+        newWindow = Filtrace(data, channel, self)
+        newWindow.show()
+
+    def btn_fcn(self):
+        try:
+            k = int(self.kanal.text())
+
+        except ValueError:
+            print("Not a number")
+
+        self.my_channel = k
+        self.newWin(self.data, self.my_channel)
+
+
 
 
 class PlotCanvas(FigureCanvas):

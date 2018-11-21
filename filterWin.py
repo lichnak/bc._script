@@ -17,13 +17,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
-# from mainWin import data
-# from mainWin import my_channel
-# import random
-
 class Filtrace(QMainWindow):
     def __init__(self, data, channel, parent):
-        print("entered Filtrace __init__")
         super().__init__()
         self.parent = parent
 
@@ -51,11 +46,11 @@ class Filtrace(QMainWindow):
         self.b1 = QPushButton('Save data as .csv', self)
         self.b2 = QPushButton('Save data as .xls', self)
         self.b3 = QPushButton('Save chart as .png', self)
-        print("pred Filtrace genfromtxt")
-        self.data = np.genfromtxt('testovaci.dat')
 
-        self.my_channel = 6
-        print("pred initUI Filtrace passed")
+        self.data = np.genfromtxt('testovaci.dat')
+        self.my_channel = channel
+        self.position1 = 101
+        self.position2 = 0.5
         self.initUI()
 
     def initUI(self):
@@ -99,31 +94,35 @@ class Filtrace(QMainWindow):
         self.rad1.setChecked(False)
         self.rad1.toggled.connect(lambda: self.m.rad1click(self.data, self.my_channel))
         self.rad2.setChecked(False)
-        self.rad2.toggled.connect(lambda: self.m.rad2click(self.data, self.my_channel, self.position))
+        self.rad2.toggled.connect(lambda: self.m.rad2click(self.data, self.my_channel))
         self.rad3.setChecked(False)
+        self.rad3.toggled.connect(lambda: self.m.rad3click(self.data, self.my_channel, self.position1))
         self.rad4.setChecked(False)
+        self.rad4.toggled.connect(lambda: self.m.rad4click(self.data, self.my_channel, self.position2))
 
         self.slide1.move(300, 441)
         self.slide1.setMaximumWidth(110)
         self.slide1.setMinimum(11)
-        self.slide1.setMaximum(1001)
+        self.slide1.setMaximum(501)
         self.slide1.setToolTip('Window length')
-        self.slide1.setSingleStep(1)
-        self.slide1.setTickInterval(100)
+        self.slide1.setSingleStep(10)
+        self.slide1.setTickInterval(50)
         self.slide1.setTickPosition(QSlider.TicksBelow)
         self.slide1.setFocusPolicy(Qt.StrongFocus)
-        self.slide1.valueChanged[int].connect(self.slide1_fcn)
+        self.slide1.valueChanged[int].connect(lambda: self.slide1_fcn(self.data, self.my_channel, \
+                                                                      self.position1))
 
         self.slide2.move(300, 472)
         self.slide2.setMaximumWidth(110)
-        self.slide2.setMinimum(1)
-        self.slide2.setMaximum(100)
+        self.slide2.setMinimum(0)
+        self.slide2.setMaximum(1.0)
         self.slide2.setToolTip('Parameter alpha')
-        self.slide2.setSingleStep(1)
-        self.slide2.setTickInterval(10)
+        self.slide2.setSingleStep(.05)
+        self.slide2.setTickInterval(.1)
         self.slide2.setTickPosition(QSlider.TicksBelow)
         self.slide2.setFocusPolicy(Qt.StrongFocus)
-#         self.slide2.valueChanged.connect(self.slide2_fcn())
+        self.slide2.valueChanged[int].connect(lambda: self.slide2_fcn(self.data, self.my_channel, \
+                                                                      self.position2))
 
         ###button1 - .csv
         self.b1.setToolTip('Click to save data to .csv file')
@@ -134,7 +133,7 @@ class Filtrace(QMainWindow):
         self.b2.setToolTip('Click to save data to .xls file')
         self.b2.move(510, 479)
         self.b2.resize(120, 27)
-        #button 3 - .png
+        # button 3 - .png
         self.b3.setToolTip('Click to save chart as .png')
         self.b3.move(510, 508)
         self.b3.resize(120, 27)
@@ -147,7 +146,6 @@ class Filtrace(QMainWindow):
     def b1_fcn(self, cisla):
         self.m.dat = cisla
         np.savetxt("filename.csv", cisla, delimiter=",")
-        print(len(cisla))
 
     def b2_fcn(self, cisla):
         self.m.dat = cisla
@@ -158,18 +156,25 @@ class Filtrace(QMainWindow):
         self.m.figure = fig
         fig.savefig('filename.png')
 
-    def slide1_fcn(self):
-        print(self.slide1.value())
-        # self.position = self.slide1.getSliderPosition ##win --> median filter
-        
-    # def slide2_fcn(self):
-        # self.position = self.slide1.getSliderPosition ##alpha --> exponential smoothing filter
+    def slide1_fcn(self, data, channel, position):
+        self.position1 = position
+        self.data = data
+        self.my_channel = channel
+        position = self.slide1.value() ##win --> median filter
+        self.position1 = position
+        self.m.rad3click(self.data, self.my_channel, self.position1)
 
+    def slide2_fcn(self, data, channel, position):
+        self.position2 = position
+        self.data = data
+        self.my_channel = channel
+        position = self.slide2.value() ##win --> exp. median filter
+        self.position2 = position
+        self.m.rad4click(self.data, self.my_channel, self.position2)
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=6.45, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
-
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
@@ -178,7 +183,6 @@ class PlotCanvas(FigureCanvas):
                                    QSizePolicy.Expanding,
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-
 
     def plot(self, data_plt, channel):
         self.my_channel = channel
@@ -190,7 +194,7 @@ class PlotCanvas(FigureCanvas):
         col = data_plt.shape[1]
         data_plt = data_plt[:, 7:col]
 
-        r = data_plt[:, 149]
+        r = data_plt[:, channel]
         s = np.arange(0, row, 1)
 
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
@@ -201,7 +205,7 @@ class PlotCanvas(FigureCanvas):
         self.draw()
 
     def rad1click(self, data_plt, channel):
-        #filtfilt - zero-phase filter
+        # filtfilt - zero-phase filter
         self.figure.clear()
         self.my_channel = channel
         self.data = data_plt
@@ -213,7 +217,7 @@ class PlotCanvas(FigureCanvas):
         col = data_plt.shape[1]
         data_plt = data_plt[:, 7:col]
 
-        r = data_plt[:, 149]
+        r = data_plt[:, channel]
         s = np.arange(0, row, 1)
 
         a = 1
@@ -221,7 +225,7 @@ class PlotCanvas(FigureCanvas):
         b = [1.0 / n] * n
         f = signal.filtfilt(b, a, r)
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
-        ax.plot(s, f, linewidth=2.0, c='b')
+        ax.plot(s, f, linewidth=2.0, c=[0.251, 0.878, 0.816])
 
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
@@ -231,11 +235,10 @@ class PlotCanvas(FigureCanvas):
         self.draw()
 
     def rad2click(self, data_plt, channel):
-        #Savitzky-Golay filter
+        # Savitzky-Golay filter
         self.figure.clear()
         self.my_channel = channel
         self.data = data_plt
-
         ax = self.figure.add_subplot(111)
         ax.autoscale(enable=True, axis='x', tight=bool)
 
@@ -243,12 +246,11 @@ class PlotCanvas(FigureCanvas):
         col = data_plt.shape[1]
         data_plt = data_plt[:, 7:col]
 
-        r = data_plt[:, 149]
+        r = data_plt[:, channel]
         s = np.arange(0, row, 1)
-
         sg = signal.savgol_filter(r, 501, 2)
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
-        ax.plot(s, sg, linewidth=2.0, c='g')
+        ax.plot(s, sg, linewidth=2.0, c=[0.196, 0.804, 0.196])
 
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
@@ -260,7 +262,7 @@ class PlotCanvas(FigureCanvas):
     def rad3click(self, data_plt, channel, win):
         # median filter
         self.figure.clear()
-        self.position = win
+        self.position1 = win
         self.my_channel = channel
         self.data = data_plt
 
@@ -271,12 +273,12 @@ class PlotCanvas(FigureCanvas):
         col = data_plt.shape[1]
         data_plt = data_plt[:, 7:col]
 
-        r = data_plt[:, 149]
+        r = data_plt[:, channel]
         s = np.arange(0, row, 1)
 
         mf = signal.medfilt(r, win)
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
-        ax.plot(s, mf, linewidth=2.0, c='g')
+        ax.plot(s, mf, linewidth=2.0, c=[1, 1, 0])
 
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
@@ -284,11 +286,11 @@ class PlotCanvas(FigureCanvas):
         self.dat = mf
 
         self.draw()
-    
-    def rad4click(self, data_plt, channel, win):
+
+    def rad4click(self, data_plt, channel, alpha):
         # exponential moving average
         self.figure.clear()
-        self.win = win
+        self.position2 = alpha
         self.my_channel = channel
         self.data = data_plt
 
@@ -299,7 +301,7 @@ class PlotCanvas(FigureCanvas):
         col = data_plt.shape[1]
         data_plt = data_plt[:, 7:col]
 
-        r = data_plt[:, 149]
+        r = data_plt[:, channel]
         s = np.arange(0, row, 1)
 
         def EMA(data, winSize):
@@ -309,10 +311,10 @@ class PlotCanvas(FigureCanvas):
             a = np.convolve(data, weights)[:len(data)]
             return a
 
-        ema = EMA(r, win)
+        ema = EMA(r, alpha)
 
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
-        ax.plot(s, ema, linewidth=2.0, c='y')
+        ax.plot(s, ema, linewidth=2.0, c=[1, 0.078, 0.577])
 
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
