@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QSizePolicy, QPushButton,\
-QLabel, QRadioButton, QSlider,  QButtonGroup, QGroupBox, QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
+QLabel, QRadioButton, QSlider,  QButtonGroup, QGroupBox, QHBoxLayout, QVBoxLayout, QGridLayout, QWidget, QDialog
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont
 
@@ -22,8 +22,11 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 # import random
 
 class Filtrace(QMainWindow):
-    def __init__(self):
+    def __init__(self, data, channel, parent):
+        print("entered Filtrace __init__")
         super().__init__()
+        self.parent = parent
+
         self.left = 10
         self.top = 10
         self.title = 'XRD data filtering'
@@ -48,11 +51,11 @@ class Filtrace(QMainWindow):
         self.b1 = QPushButton('Save data as .csv', self)
         self.b2 = QPushButton('Save data as .xls', self)
         self.b3 = QPushButton('Save chart as .png', self)
-
+        print("pred Filtrace genfromtxt")
         self.data = np.genfromtxt('testovaci.dat')
 
         self.my_channel = 6
-
+        print("pred initUI Filtrace passed")
         self.initUI()
 
     def initUI(self):

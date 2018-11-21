@@ -95,8 +95,10 @@ class App(QMainWindow):
     def newWin(self, data, channel):
         self.data = data
         self.my_channel = channel
-        Filtrace(data, channel)
-        self.show()
+        print("pred Filtraci passed")
+        nove_okno = Filtrace(data, channel, self)
+        print("Filtrace passed")
+        nove_okno.show()
 
 
 class PlotCanvas(FigureCanvas):

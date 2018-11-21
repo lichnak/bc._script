@@ -7,7 +7,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 import os
-os.chdir('F:\\')
+#os.chdir('F:\\')
 
 fig1 = plt.figure(1)
 
