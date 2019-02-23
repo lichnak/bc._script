@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QSizePolicy, QPushButton,\
-QFileDialog, QLabel, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout
+QFileDialog, QLabel, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -12,6 +12,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
+
+from filterWin import Filtrace
+
 
 class App(QMainWindow):
     def __init__(self):
@@ -28,14 +31,25 @@ class App(QMainWindow):
         self.label1 = QLabel('', self)
 
         self.tabs = QTabWidget(self)
-        self.tab1 = QWidget()
-        self.tab2 = QWidget()
 
-        self.m = PlotCanvas(self, width=6.9, height=4.5)
+        # setting the main tab
+        self.tab1 = QWidget()
+        self.label2 = QLabel('Specify theta', self)
+        self.kanal = QLineEdit('', self)
+        self.button2 = QPushButton('Next', self)
+        self.m = PlotCanvas(self, width=6.9, height=2.5)
         self.m.move(15, 40)
         self.tools = NavigationToolbar(self.m, self)
         self.tools.move(15, 500)
         self.tools.resize(400, 30)
+
+        # setting the secondary tab
+        #self.tab2 = QWidget()
+        #self.m2 = PlotCanvas(self, width=6.9, height=2.5)
+        #self.m2.move(15, 40)
+        #self.tools2 = NavigationToolbar(self.m2, self)
+        #self.tools2.move(15, 500)
+        #self.tools2.resize(400, 30)
 
         self.initUI()
 
@@ -54,15 +68,44 @@ class App(QMainWindow):
         self.label1.setMinimumWidth(600)
         self.label1.setMaximumHeight(27)
 
+        ## tabs
         self.tabs.resize(710, 500)
         self.tabs.move(5, 38)
-        self.tabs.addTab(self.tab1, "A")
-        self.tabs.addTab(self.tab2, "B")
+        self.tabs.addTab(self.tab1, " Main ")
+        #txt = " Theta "
+        #self.tabs.addTab(self.tab2, txt)
 
-        self.tab1.layout = QVBoxLayout(self)
+        ## main tab
+        self.button2.move(630, 501)
+        self.button2.resize(75, 27)
+        self.button2.clicked.connect(self.btn_fcn)
+
+        self.label2.move(430, 500)
+        self.label2.resize = (48, 27)
+
+        self.kanal.setToolTip('Enter theta value')
+        self.kanal.move(525, 500)
+        self.kanal.resize(100, 30)
+
+        self.buttons_layout = QHBoxLayout(self)
+        self.buttons_layout.addWidget(self.button2)
+        self.buttons_layout.addWidget(self.tools)
+        self.buttons_layout.addWidget(self.label2)
+        self.buttons_layout.addWidget(self.kanal)
+
+        self.tab1.layout = QGridLayout(self)
         self.tab1.layout.addWidget(self.m)
         self.tab1.setLayout(self.tab1.layout)
 
+
+
+        # secondary tab
+        #self.tab2.layout = QGridLayout(self)
+        #self.tab2.layout.addWidget(self.m2)
+        #self.tab2.layout.addWidget(self.tools2)
+        #self.tab2.setLayout(self.tab2.layout)
+
+        ##
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
@@ -75,12 +118,30 @@ class App(QMainWindow):
         if self.fileName:
             self.data = np.genfromtxt(self.fileName)
             self.label1.setText(" Current file:   " + str(self.fileName))
-        self.show()
-        self.m.plotit(self.data)
+            self.show()
+            self.m.plotit(self.data)
+        else:
+            print("Error: File not selected")
+
+    def btn_fcn(self):
+        try:
+            k = int(self.kanal.text())
+
+        except ValueError:
+            print("Not a number")
+
+        self.my_channel = k
+        self.newWin(self.data, self.my_channel)
+
+    def newWin(self, data, channel):
+        self.data = data
+        self.my_channel = channel
+        newWindow = Filtrace(data, channel, self)
+        newWindow.show()
 
 
 class PlotCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=6.9, height=4.5, dpi=100):
+    def __init__(self, parent=None, width=6.9, height=3.2, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
 
