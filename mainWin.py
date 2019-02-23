@@ -27,7 +27,7 @@ class App(QMainWindow):
 
         self.button1 = QPushButton('Open file', self)
         self.label1 = QLabel('', self)
-        self.label2 = QLabel('Data channel', self)
+        self.label2 = QLabel('Specify theta', self)
         self.kanal = QLineEdit('', self)
         self.button2 = QPushButton('Next', self)
 
@@ -37,7 +37,7 @@ class App(QMainWindow):
         self.m.move(15, 40)
         self.tools = NavigationToolbar(self.m, self)
         self.tools.move(15, 500)
-        self.tools.resize(415, 30)
+        self.tools.resize(400, 30)
 
         self.initUI()
 
@@ -46,20 +46,20 @@ class App(QMainWindow):
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setMaximumSize(720, 540)
 
-        self.button1.setToolTip('Click to open data file')
+        self.button1.setToolTip('Click to load data')
         self.button1.move(15, 7)
-        self.button1.resize(72, 26)
+        self.button1.resize(75, 26)
         self.button1.clicked.connect(self.file_fcn)
 
         self.label1.move(100, 6)
-        self.label1.setText(" Current file:  None ")
+        self.label1.setText(" Current file:  No file was selected ")
         self.label1.setMinimumWidth(600)
         self.label1.setMaximumHeight(27)
 
-        self.label2.move(450, 500)
+        self.label2.move(430, 500)
         self.label2.resize = (48, 27)
 
-        self.kanal.setToolTip('Enter data channel')
+        self.kanal.setToolTip('Enter theta value')
         self.kanal.move(525, 500)
         self.kanal.resize(100, 30)
 
