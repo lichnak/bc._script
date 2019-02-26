@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QSizePolicy, QPushButton,\
-QFileDialog, QLabel, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout
+QFileDialog, QLabel, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QTabBar
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -37,7 +37,7 @@ class App(QMainWindow):
         self.label2 = QLabel('Specify theta', self)
         self.kanal = QLineEdit('', self)
         self.button2 = QPushButton('Next', self)
-        self.m = PlotCanvas(self, width=6.9, height=2.5)
+        self.m = PlotCanvas(self, 710, 450)
         self.m.move(15, 40)
         self.tools = NavigationToolbar(self.m, self)
         self.tools.move(15, 500)
@@ -79,6 +79,7 @@ class App(QMainWindow):
         self.button2.move(630, 501)
         self.button2.resize(75, 27)
         self.button2.clicked.connect(self.btn_fcn)
+        self.button2.clicked.connect(self.newTab_fcn)
 
         self.label2.move(430, 500)
         self.label2.resize = (48, 27)
@@ -93,11 +94,9 @@ class App(QMainWindow):
         self.buttons_layout.addWidget(self.label2)
         self.buttons_layout.addWidget(self.kanal)
 
-        self.tab1.layout = QGridLayout(self)
+        self.tab1.layout = QVBoxLayout(self)
         self.tab1.layout.addWidget(self.m)
         self.tab1.setLayout(self.tab1.layout)
-
-
 
         # secondary tab
         #self.tab2.layout = QGridLayout(self)
@@ -131,18 +130,20 @@ class App(QMainWindow):
             print("Not a number")
 
         self.my_channel = k
-        self.newWin(self.data, self.my_channel)
+        print(k)
 
-    def newWin(self, data, channel):
-        self.data = data
-        self.my_channel = channel
-        newWindow = Filtrace(data, channel, self)
-        newWindow.show()
-
+    def newTab_fcn(self, k):
+        self.my_channel = k
+        tab = QWidget()
+        print(type(k))
+        self.tabs.addTab(tab, "Theta :")
+        print("ok2")
+        tab.setTabsClosable = True
+        print("ok3")
 
 class PlotCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=6.9, height=3.2, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
+    def __init__(self, parent=None, width=710, height=500):
+        fig = Figure(figsize=(710, 500))
         self.axes = fig.add_subplot(111)
 
         FigureCanvas.__init__(self, fig)
