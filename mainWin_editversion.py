@@ -37,19 +37,12 @@ class App(QMainWindow):
         self.label2 = QLabel('Specify theta', self)
         self.kanal = QLineEdit('', self)
         self.button2 = QPushButton('Next', self)
+
         self.m = PlotCanvas(self, 710, 450)
         self.m.move(15, 40)
         self.tools = NavigationToolbar(self.m, self)
         self.tools.move(15, 500)
         self.tools.resize(400, 30)
-
-        # setting the secondary tab
-        #self.tab2 = QWidget()
-        #self.m2 = PlotCanvas(self, width=6.9, height=2.5)
-        #self.m2.move(15, 40)
-        #self.tools2 = NavigationToolbar(self.m2, self)
-        #self.tools2.move(15, 500)
-        #self.tools2.resize(400, 30)
 
         self.initUI()
 
@@ -68,14 +61,12 @@ class App(QMainWindow):
         self.label1.setMinimumWidth(600)
         self.label1.setMaximumHeight(27)
 
-        ## tabs
+        # tabs
         self.tabs.resize(710, 500)
         self.tabs.move(5, 38)
         self.tabs.addTab(self.tab1, " Main ")
-        #txt = " Theta "
-        #self.tabs.addTab(self.tab2, txt)
 
-        ## main tab
+        # main tab
         self.button2.move(630, 501)
         self.button2.resize(75, 27)
         self.button2.clicked.connect(self.btn_fcn)
@@ -88,25 +79,19 @@ class App(QMainWindow):
         self.kanal.move(525, 500)
         self.kanal.resize(100, 30)
 
-        self.buttons_layout = QHBoxLayout(self)
-        self.buttons_layout.addWidget(self.button2)
-        self.buttons_layout.addWidget(self.tools)
-        self.buttons_layout.addWidget(self.label2)
-        self.buttons_layout.addWidget(self.kanal)
 
         self.tab1.layout = QVBoxLayout(self)
         self.tab1.layout.addWidget(self.m)
         self.tab1.setLayout(self.tab1.layout)
 
-        # secondary tab
-        #self.tab2.layout = QGridLayout(self)
-        #self.tab2.layout.addWidget(self.m2)
-        #self.tab2.layout.addWidget(self.tools2)
-        #self.tab2.setLayout(self.tab2.layout)
-
-        ##
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
+
+        self.buttons_layout = QHBoxLayout(self)
+        self.buttons_layout.addWidget(self.button2)
+        self.buttons_layout.addWidget(self.tools)
+        self.buttons_layout.addWidget(self.label2)
+        self.buttons_layout.addWidget(self.kanal)
 
         self.show()
 
@@ -130,16 +115,24 @@ class App(QMainWindow):
             print("Not a number")
 
         self.my_channel = k
-        print(k)
 
     def newTab_fcn(self, k):
-        self.my_channel = k
-        tab = QWidget()
-        print(type(k))
-        self.tabs.addTab(tab, "Theta :")
+        k = self.my_channel
+        self.tab = QWidget()
+        self.tabs.addTab(self.tab, "Theta:  "+str(k)+" °")
+        self.tabs.setTabsClosable(True)
+        print("ok1")
+        self.m2 = PlotCanvas(self, 710, 450)
+        self.m2.move(15, 40)
+        self.tools = NavigationToolbar(self.m2, self)
+        self.tools.move(15, 500)
+        self.tools.resize(400, 30)
         print("ok2")
-        tab.setTabsClosable = True
+        self.tab.layout = QVBoxLayout(self)
+        self.tab.layout.addWidget(self.m2)
+        self.tab.setLayout(self.tab.layout)
         print("ok3")
+
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=710, height=500):
