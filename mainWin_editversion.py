@@ -1,7 +1,8 @@
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QSizePolicy, QPushButton,\
-QFileDialog, QLabel, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QTabBar
+QFileDialog, QLabel, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,\
+QSlider, QRadioButton, QButtonGroup, QFormLayout
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -12,8 +13,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
-
-from filterWin import Filtrace
 
 
 class App(QMainWindow):
@@ -32,7 +31,6 @@ class App(QMainWindow):
 
         self.tabs = QTabWidget(self)
 
-        # setting the main tab
         self.tab1 = QWidget()
         self.label2 = QLabel('Specify theta', self)
         self.kanal = QLineEdit('', self)
@@ -56,21 +54,19 @@ class App(QMainWindow):
         self.button1.resize(90, 26)
         self.button1.clicked.connect(self.file_fcn)
 
+        self.button2.move(630, 501)
+        self.button2.resize(75, 27)
+        self.button2.clicked.connect(self.btn_fcn)
+        self.button2.clicked.connect(self.newTab_fcn)
+
         self.label1.move(100, 6)
         self.label1.setText(" Current file:  None ")
         self.label1.setMinimumWidth(600)
         self.label1.setMaximumHeight(27)
 
-        # tabs
         self.tabs.resize(710, 500)
         self.tabs.move(5, 38)
         self.tabs.addTab(self.tab1, " Main ")
-
-        # main tab
-        self.button2.move(630, 501)
-        self.button2.resize(75, 27)
-        self.button2.clicked.connect(self.btn_fcn)
-        self.button2.clicked.connect(self.newTab_fcn)
 
         self.label2.move(430, 500)
         self.label2.resize = (48, 27)
@@ -79,21 +75,26 @@ class App(QMainWindow):
         self.kanal.move(525, 500)
         self.kanal.resize(100, 30)
 
-
-        self.tab1.layout = QVBoxLayout(self)
-        self.tab1.layout.addWidget(self.m)
-        self.tab1.setLayout(self.tab1.layout)
-
-        self.layout.addWidget(self.tabs)
-        self.setLayout(self.layout)
-
-        self.buttons_layout = QHBoxLayout(self)
-        self.buttons_layout.addWidget(self.button2)
+        self.buttons = QWidget(self)
+        self.buttons_layout = QHBoxLayout()
+        self.buttons.setLayout(self.buttons_layout)
         self.buttons_layout.addWidget(self.tools)
         self.buttons_layout.addWidget(self.label2)
         self.buttons_layout.addWidget(self.kanal)
+        self.buttons_layout.addWidget(self.button2)
+        print("ok0")
+        self.tab1.layout = QVBoxLayout()
+        self.tab1.layout.addWidget(self.m)
+        self.tab1.layout.addWidget(self.buttons)
+        self.tab1.setLayout(self.tab1.layout)
+        print("ok1")
+        self.layout.addWidget(self.tabs)
+        self.setLayout(self.layout)
+        print("ok2")
+
 
         self.show()
+
 
     def file_fcn(self):
         options = QFileDialog.Options()
@@ -110,28 +111,73 @@ class App(QMainWindow):
     def btn_fcn(self):
         try:
             k = int(self.kanal.text())
+            print("ok4")
 
         except ValueError:
             print("Not a number")
 
         self.my_channel = k
 
-    def newTab_fcn(self, k):
+    def newTab_fcn(self):
         k = self.my_channel
         self.tab = QWidget()
         self.tabs.addTab(self.tab, "Theta:  "+str(k)+" °")
         self.tabs.setTabsClosable(True)
-        print("ok1")
+
         self.m2 = PlotCanvas(self, 710, 450)
         self.m2.move(15, 40)
-        self.tools = NavigationToolbar(self.m2, self)
-        self.tools.move(15, 500)
-        self.tools.resize(400, 30)
-        print("ok2")
-        self.tab.layout = QVBoxLayout(self)
-        self.tab.layout.addWidget(self.m2)
+
+        self.label0 = QLabel('Select data filter and its parameters', self)
+        self.labelx = QLabel('Export to file', self)
+        self.rad1 = QRadioButton("&Zero-phase")
+        self.rad2 = QRadioButton("&Savitzky-Golay")
+        self.rad3 = QRadioButton("&Median")
+        self.rad4 = QRadioButton("&Exponential smoothing")
+        self.slide1 = QSlider(Qt.Horizontal, self)
+        self.slide2 = QSlider(Qt.Horizontal)
+        self.b1 = QPushButton('Save data as .csv', self)
+        self.b2 = QPushButton('Save data as .xls', self)
+        self.b3 = QPushButton('Save chart as .png', self)
+
+        self.layout1 = QHBoxLayout()
+        self.layout2 = QHBoxLayout()
+        self.layout3 = QVBoxLayout()
+
+        self.widget1 = QWidget(self)
+        self.widget2 = QWidget(self)
+        self.widget3 = QWidget(self)
+        self.widget1.setLayout(self.layout1)
+        self.widget2.setLayout(self.layout2)
+        self.widget3.setLayout(self.layout3)
+        self.widget1.resize(440, 35)
+        self.widget1.move(10, 440)
+        self.widget2.resize(440, 35)
+        self.widget2.move(10, 468)
+        self.widget3.move(520, 450)
+        self.widget3.resize(120, 90)
+
+        self.layout1.addWidget(self.rad1)
+        self.layout2.addWidget(self.rad2)
+        self.layout1.addWidget(self.rad3)
+        self.layout2.addWidget(self.rad4)
+        self.layout1.addWidget(self.slide1)
+        self.layout2.addWidget(self.slide2)
+        self.layout3.addWidget(self.b1)
+        self.layout3.addWidget(self.b2)
+        self.layout3.addWidget(self.b3)
+
+        self.group = QButtonGroup(self)
+        self.group.addButton(self.rad1)
+        self.group.addButton(self.rad2)
+        self.group.addButton(self.rad3)
+        self.group.addButton(self.rad4)
+
+        self.tab.layout = QGridLayout(self)
+        self.tab.layout.addWidget(self.m2, 0, 0, 4, -1)
+        self.tab.layout.addWidget(self.widget1, 4, 0, 2, 1)
+        self.tab.layout.addWidget(self.widget2, 5, 0, 2, 1)
+        self.tab.layout.addWidget(self.widget3, 4, 6, 1, -1)
         self.tab.setLayout(self.tab.layout)
-        print("ok3")
 
 
 class PlotCanvas(FigureCanvas):
