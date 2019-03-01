@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QSizePolicy, Q
 QFileDialog, QLabel, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,\
 QSlider, QRadioButton, QButtonGroup, QFormLayout
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QFont
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -93,7 +94,6 @@ class App(QMainWindow):
 
         self.show()
 
-
     def file_fcn(self):
         options = QFileDialog.Options()
         self.fileName, _ = QFileDialog.getOpenFileName(self, "Otevřít soubor - zpracování XRD dat", "",
@@ -102,14 +102,13 @@ class App(QMainWindow):
             self.data = np.genfromtxt(self.fileName)
             self.label1.setText(" Current file:   " + str(self.fileName))
             self.show()
-            self.m.plotit(self.data)
+            self.m.threedee_plt(self.data)
         else:
             print("Error: File not selected")
 
     def btn_fcn(self):
         try:
             k = int(self.kanal.text())
-            print("ok4")
 
         except ValueError:
             print("Not a number")
@@ -122,37 +121,82 @@ class App(QMainWindow):
         self.tabs.addTab(self.tab, "Theta:  "+str(k)+" °")
         self.tabs.setTabsClosable(True)
 
-        self.m2 = PlotCanvas(self, 710, 450)
+        self.m2 = NewTabCanvas(self, 710, 450)
         self.m2.move(15, 40)
 
         self.label0 = QLabel('Select data filter and its parameters', self)
+        self.label0.setFont(QFont("Sans Serif", 11))
         self.labelx = QLabel('Export to file', self)
+        self.labelx.setFont(QFont("Sans Serif", 11))
+
         self.rad1 = QRadioButton("&Zero-phase")
+        self.rad1.setChecked(False)
         self.rad2 = QRadioButton("&Savitzky-Golay")
+        self.rad2.setChecked(False)
         self.rad3 = QRadioButton("&Median")
+        self.rad3.setChecked(False)
         self.rad4 = QRadioButton("&Exponential smoothing")
+        self.rad4.setChecked(False)
+
         self.slide1 = QSlider(Qt.Horizontal, self)
+        self.slide1.setMaximumWidth(110)
+        self.slide1.setMinimum(11)
+        self.slide1.setMaximum(501)
+        self.slide1.setToolTip('Window length')
+        self.slide1.setSingleStep(10)
+        self.slide1.setTickInterval(50)
+        self.slide1.setTickPosition(QSlider.TicksBelow)
+        self.slide1.setFocusPolicy(Qt.StrongFocus)
+
         self.slide2 = QSlider(Qt.Horizontal)
+        self.slide2.move(300, 472)
+        self.slide2.setMaximumWidth(110)
+        self.slide2.setMinimum(0)
+        self.slide2.setMaximum(1.0)
+        self.slide2.setToolTip('Parameter alpha')
+        self.slide2.setSingleStep(.05)
+        self.slide2.setTickInterval(.1)
+        self.slide2.setTickPosition(QSlider.TicksBelow)
+        self.slide2.setFocusPolicy(Qt.StrongFocus)
+
         self.b1 = QPushButton('Save data as .csv', self)
+        self.b1.setToolTip('Click to save data to .csv file')
+        self.b1.move(510, 450)
+        self.b1.resize(120, 27)
+
         self.b2 = QPushButton('Save data as .xls', self)
+        self.b2.setToolTip('Click to save data to .xls file')
+        self.b2.move(510, 479)
+        self.b2.resize(120, 27)
+
         self.b3 = QPushButton('Save chart as .png', self)
+        self.b3.setToolTip('Click to save chart as .png')
+        self.b3.move(510, 508)
+        self.b3.resize(120, 27)
 
         self.layout1 = QHBoxLayout()
         self.layout2 = QHBoxLayout()
         self.layout3 = QVBoxLayout()
+        self.layout4 = QHBoxLayout()
 
         self.widget1 = QWidget(self)
         self.widget2 = QWidget(self)
         self.widget3 = QWidget(self)
+        self.widget4 = QWidget(self)
+
         self.widget1.setLayout(self.layout1)
         self.widget2.setLayout(self.layout2)
         self.widget3.setLayout(self.layout3)
+        self.widget4.setLayout(self.layout4)
+
         self.widget1.resize(440, 35)
         self.widget1.move(10, 440)
         self.widget2.resize(440, 35)
         self.widget2.move(10, 468)
         self.widget3.move(520, 450)
         self.widget3.resize(120, 90)
+        self.widget4.move(15,412)
+        self.widget4.resize(700, 27)
 
         self.layout1.addWidget(self.rad1)
         self.layout2.addWidget(self.rad2)
@@ -171,12 +215,19 @@ class App(QMainWindow):
         self.group.addButton(self.rad4)
 
         self.tab.layout = QGridLayout(self)
+        self.tab.setLayout(self.tab.layout)
         self.tab.layout.addWidget(self.m2, 0, 0, 4, -1)
         self.tab.layout.addWidget(self.widget1, 4, 0, 2, 1)
-        self.tab.layout.addWidget(self.widget2, 5, 0, 2, 1)
-        self.tab.layout.addWidget(self.widget3, 4, 6, 1, -1)
-        self.tab.setLayout(self.tab.layout)
+        self.tab.layout.addWidget(self.widget2, 6, 0, 2, 1)
+        self.tab.layout.addWidget(self.widget3, 5, 6, 1, 3)
 
+        # ----------- debugger ---------------------------
+        print(self.data.shape) # funkční
+        print(str(self.my_channel)) # funkční
+        # tady chyba:
+        # self.m2.twodee_plt(self.data, self.my_channel)
+        print("ok2") # nepotvrzeno
+        # ------------------------------------------------
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=710, height=500):
@@ -191,7 +242,7 @@ class PlotCanvas(FigureCanvas):
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-    def plotit(self, data_plt):
+    def threedee_plt(self, data_plt):
         self.data = data_plt
         ax = self.figure.add_subplot(111)
         ax.plot(data_plt)
@@ -213,6 +264,39 @@ class PlotCanvas(FigureCanvas):
         ax.set_zlabel('Intensity ()')
 
         self.draw()
+
+class NewTabCanvas(FigureCanvas):
+        def __init__(self, parent=None, width=710, height=500):
+            fig = Figure(figsize=(710, 500))
+            self.axes = fig.add_subplot(111)
+
+            FigureCanvas.__init__(self, fig)
+            self.setParent(parent)
+
+            FigureCanvas.setSizePolicy(self,
+                                       QSizePolicy.Expanding,
+                                       QSizePolicy.Expanding)
+            FigureCanvas.updateGeometry(self)
+
+        def twodee_plt(self, data_plt, kanal):
+            self.my_channel = kanal
+            self.data = data_plt
+            ax = self.figure.add_subplot(111)
+            ax.autoscale(enable=True, axis='x', tight=bool)
+
+            row = data_plt.shape[0]
+            col = data_plt.shape[1]
+            data_plt = data_plt[:, 7:col]
+
+            r = data_plt[:, kanal]
+            s = np.arange(0, row, 1)
+
+            ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
+
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel('Intensity ()')
+
+            self.draw()
 
 
 if __name__ == '__main__':
