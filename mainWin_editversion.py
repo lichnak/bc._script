@@ -82,16 +82,14 @@ class App(QMainWindow):
         self.buttons_layout.addWidget(self.label2)
         self.buttons_layout.addWidget(self.kanal)
         self.buttons_layout.addWidget(self.button2)
-        print("ok0")
+
         self.tab1.layout = QVBoxLayout()
         self.tab1.layout.addWidget(self.m)
         self.tab1.layout.addWidget(self.buttons)
         self.tab1.setLayout(self.tab1.layout)
-        print("ok1")
+
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
-        print("ok2")
-
 
         self.show()
 
