@@ -214,20 +214,22 @@ class App(QMainWindow):
         self.group.addButton(self.rad3)
         self.group.addButton(self.rad4)
 
+        # --- potřeba doladit rozložení widgetů v layoutu ---
         self.tab.layout = QGridLayout(self)
         self.tab.setLayout(self.tab.layout)
         self.tab.layout.addWidget(self.m2, 0, 0, 4, -1)
         self.tab.layout.addWidget(self.widget1, 4, 0, 2, 1)
         self.tab.layout.addWidget(self.widget2, 6, 0, 2, 1)
         self.tab.layout.addWidget(self.widget3, 5, 6, 1, 3)
+        # ---------------------------------------------------
 
-        # ----------- debugger ---------------------------
+        # ----------- debugger ------------------------------
         print(self.data.shape) # funkční
         print(str(self.my_channel)) # funkční
         # tady chyba:
         # self.m2.twodee_plt(self.data, self.my_channel)
         print("ok2") # nepotvrzeno
-        # ------------------------------------------------
+        # ---------------------------------------------------
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=710, height=500):
