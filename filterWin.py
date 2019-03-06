@@ -172,6 +172,7 @@ class Filtrace(QMainWindow):
         self.position2 = position
         self.m.rad4click(self.data, self.my_channel, self.position2)
 
+
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=6.45, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)

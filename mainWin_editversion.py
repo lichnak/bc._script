@@ -196,7 +196,7 @@ class App(QMainWindow):
         self.widget3.move(520, 450)
         self.widget3.resize(120, 90)
         self.widget4.move(15,412)
-        self.widget4.resize(700, 27)
+        self.widget4.resize(720, 27)
 
         self.layout1.addWidget(self.rad1)
         self.layout2.addWidget(self.rad2)
@@ -204,9 +204,11 @@ class App(QMainWindow):
         self.layout2.addWidget(self.rad4)
         self.layout1.addWidget(self.slide1)
         self.layout2.addWidget(self.slide2)
+        self.layout3.addWidget(self.labelx)
         self.layout3.addWidget(self.b1)
         self.layout3.addWidget(self.b2)
         self.layout3.addWidget(self.b3)
+        self.layout4.addWidget(self.label0)
 
         self.group = QButtonGroup(self)
         self.group.addButton(self.rad1)
@@ -214,20 +216,20 @@ class App(QMainWindow):
         self.group.addButton(self.rad3)
         self.group.addButton(self.rad4)
 
-        # --- potřeba doladit rozložení widgetů v layoutu ---
         self.tab.layout = QGridLayout(self)
+        self.tab.layout.setSpacing(7)
+        self.tab.layout.addWidget(self.m2, 1, 0, 4, 2)
+        self.tab.layout.addWidget(self.widget1, 6, 0)
+        self.tab.layout.addWidget(self.widget2, 7, 0)
+        self.tab.layout.addWidget(self.widget4, 5, 0)
+        self.tab.layout.addWidget(self.widget3, 5, 1, 3, 1)
         self.tab.setLayout(self.tab.layout)
-        self.tab.layout.addWidget(self.m2, 0, 0, 4, -1)
-        self.tab.layout.addWidget(self.widget1, 4, 0, 2, 1)
-        self.tab.layout.addWidget(self.widget2, 6, 0, 2, 1)
-        self.tab.layout.addWidget(self.widget3, 5, 6, 1, 3)
-        # ---------------------------------------------------
 
         # ----------- debugger ------------------------------
         print(self.data.shape) # funkční
         print(str(self.my_channel)) # funkční
         # tady chyba:
-        # self.m2.twodee_plt(self.data, self.my_channel)
+        #self.m2.twodee_plt(self.data, self.my_channel)
         print("ok2") # nepotvrzeno
         # ---------------------------------------------------
 
@@ -267,38 +269,39 @@ class PlotCanvas(FigureCanvas):
 
         self.draw()
 
+
 class NewTabCanvas(FigureCanvas):
-        def __init__(self, parent=None, width=710, height=500):
-            fig = Figure(figsize=(710, 500))
-            self.axes = fig.add_subplot(111)
+    def __init__(self, parent=None, width=710, height=500):
+        fig2 = Figure(figsize=(710, 500))
+        self.axes = fig2.add_subplot(111)
 
-            FigureCanvas.__init__(self, fig)
-            self.setParent(parent)
+        FigureCanvas.__init__(self, fig2)
+        self.setParent(parent)
 
-            FigureCanvas.setSizePolicy(self,
-                                       QSizePolicy.Expanding,
-                                       QSizePolicy.Expanding)
-            FigureCanvas.updateGeometry(self)
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
 
-        def twodee_plt(self, data_plt, kanal):
-            self.my_channel = kanal
-            self.data = data_plt
-            ax = self.figure.add_subplot(111)
-            ax.autoscale(enable=True, axis='x', tight=bool)
+    def twodee_plt(self, data_plt, kanal):
+        self.my_channel = kanal
+        self.data = data_plt
+        ax = self.figure.add_subplot(111)
+        ax.autoscale(enable=True, axis='x', tight=bool)
 
-            row = data_plt.shape[0]
-            col = data_plt.shape[1]
-            data_plt = data_plt[:, 7:col]
+        row = data_plt.shape[0]
+        col = data_plt.shape[1]
+        data_plt = data_plt[:, 7:col]
 
-            r = data_plt[:, kanal]
-            s = np.arange(0, row, 1)
+        r = data_plt[:, kanal]
+        s = np.arange(0, row, 1)
 
-            ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
+        ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
 
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel('Intensity ()')
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Intensity ()')
 
-            self.draw()
+        self.draw()
 
 
 if __name__ == '__main__':
