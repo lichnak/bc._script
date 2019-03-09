@@ -2,18 +2,20 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QSizePolicy, QPushButton,\
 QFileDialog, QLabel, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,\
-QSlider, QRadioButton, QButtonGroup, QFormLayout
+QSlider, QRadioButton, QButtonGroup, QFormLayout, QTabBar
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QColor
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import numpy as np
+import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from scipy import signal
 
 
 class App(QMainWindow):
@@ -31,7 +33,6 @@ class App(QMainWindow):
         self.label1 = QLabel('', self)
 
         self.tabs = QTabWidget(self)
-
         self.tab1 = QWidget()
         self.label2 = QLabel('Specify theta', self)
         self.kanal = QLineEdit('', self)
@@ -42,6 +43,8 @@ class App(QMainWindow):
         self.tools = NavigationToolbar(self.m, self)
         self.tools.move(15, 500)
         self.tools.resize(400, 30)
+
+        self.setStyleSheet("QMainWindow { background-color: rgb(253, 253, 253) }")
 
         self.initUI()
 
@@ -67,7 +70,7 @@ class App(QMainWindow):
 
         self.tabs.resize(710, 500)
         self.tabs.move(5, 38)
-        self.tabs.addTab(self.tab1, " Main ")
+        self.tabs.addTab(self.tab1, "Main window")
 
         self.label2.move(430, 500)
         self.label2.resize = (48, 27)
@@ -92,6 +95,8 @@ class App(QMainWindow):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
+        self.tabs.tabCloseRequested.connect(self.closeTab)
+
         self.show()
 
     def file_fcn(self):
@@ -115,54 +120,71 @@ class App(QMainWindow):
 
         self.my_channel = k
 
-    def newTab_fcn(self):
+    def newTab_fcn(self, i):
+
         k = self.my_channel
+        self.position1 = 101
+        self.position2 = 99
+
         self.tab = QWidget()
         self.tabs.addTab(self.tab, "Theta:  "+str(k)+" °")
+
+        self.tabs.setCurrentIndex(i)
+
         self.tabs.setTabsClosable(True)
+        self.tabs.setMovable(True)
 
         self.m2 = NewTabCanvas(self, 710, 450)
         self.m2.move(15, 40)
 
         self.label0 = QLabel('Select data filter and its parameters', self)
+        self.label0.resize(250, 26)
         self.label0.setFont(QFont("Sans Serif", 11))
         self.labelx = QLabel('Export to file', self)
+        self.labelx.resize(150, 26)
         self.labelx.setFont(QFont("Sans Serif", 11))
 
         self.rad1 = QRadioButton("&Zero-phase")
         self.rad1.setChecked(False)
+        self.rad1.toggled.connect(lambda: self.m2.rad1click(self.data, self.my_channel))
         self.rad2 = QRadioButton("&Savitzky-Golay")
         self.rad2.setChecked(False)
+        self.rad2.toggled.connect(lambda: self.m2.rad2click(self.data, self.my_channel))
         self.rad3 = QRadioButton("&Median")
         self.rad3.setChecked(False)
+        self.rad3.toggled.connect(lambda: self.m2.rad3click(self.data, self.my_channel, self.position1))
         self.rad4 = QRadioButton("&Exponential smoothing")
         self.rad4.setChecked(False)
+        self.rad4.toggled.connect(lambda: self.m2.rad4click(self.data, self.my_channel, self.position2))
 
         self.slide1 = QSlider(Qt.Horizontal, self)
         self.slide1.setMaximumWidth(110)
         self.slide1.setMinimum(11)
         self.slide1.setMaximum(501)
         self.slide1.setToolTip('Window length')
-        self.slide1.setSingleStep(10)
+        self.slide1.setSingleStep(20)
         self.slide1.setTickInterval(50)
         self.slide1.setTickPosition(QSlider.TicksBelow)
-        self.slide1.setFocusPolicy(Qt.StrongFocus)
-
+        #self.slide1.setFocusPolicy(Qt.StrongFocus)
+        self.slide1.valueChanged[int].connect(lambda: self.slide1_fcn(self.data, self.my_channel, \
+                                                                      self.position1))
         self.slide2 = QSlider(Qt.Horizontal)
         self.slide2.move(300, 472)
         self.slide2.setMaximumWidth(110)
-        self.slide2.setMinimum(0)
-        self.slide2.setMaximum(1.0)
+        self.slide2.setMinimum(1)
+        self.slide2.setMaximum(99)
         self.slide2.setToolTip('Parameter alpha')
-        self.slide2.setSingleStep(.05)
-        self.slide2.setTickInterval(.1)
+        self.slide2.setSingleStep(1)
+        self.slide2.setTickInterval(10)
         self.slide2.setTickPosition(QSlider.TicksBelow)
         self.slide2.setFocusPolicy(Qt.StrongFocus)
-
+        self.slide2.valueChanged[int].connect(lambda: self.slide2_fcn(self.data, self.my_channel, \
+                                                                      self.position2))
         self.b1 = QPushButton('Save data as .csv', self)
         self.b1.setToolTip('Click to save data to .csv file')
         self.b1.move(510, 450)
         self.b1.resize(120, 27)
+        self.b1.clicked.connect(lambda: self.b1_fcn(self.m2.dat))
 
         self.b2 = QPushButton('Save data as .xls', self)
         self.b2.setToolTip('Click to save data to .xls file')
@@ -173,6 +195,7 @@ class App(QMainWindow):
         self.b3.setToolTip('Click to save chart as .png')
         self.b3.move(510, 508)
         self.b3.resize(120, 27)
+        self.b3.clicked.connect(lambda: self.b3_fcn(self.m2.figure))
 
         self.layout1 = QHBoxLayout()
         self.layout2 = QHBoxLayout()
@@ -195,7 +218,7 @@ class App(QMainWindow):
         self.widget2.move(10, 468)
         self.widget3.move(520, 450)
         self.widget3.resize(120, 90)
-        self.widget4.move(15,412)
+        self.widget4.move(15, 412)
         self.widget4.resize(720, 27)
 
         self.layout1.addWidget(self.rad1)
@@ -225,13 +248,43 @@ class App(QMainWindow):
         self.tab.layout.addWidget(self.widget3, 5, 1, 3, 1)
         self.tab.setLayout(self.tab.layout)
 
-        # ----------- debugger ------------------------------
-        print(self.data.shape) # funkční
-        print(str(self.my_channel)) # funkční
-        # tady chyba:
-        #self.m2.twodee_plt(self.data, self.my_channel)
-        print("ok2") # nepotvrzeno
-        # ---------------------------------------------------
+        self.m2.twodee_plt(self.data, self.my_channel)
+
+    def b1_fcn(self, cisla):
+        self.m2.dat = cisla
+        np.savetxt("filename.csv", cisla, delimiter=",")
+
+    def b2_fcn(self, cisla):
+        self.m2.dat = cisla
+        cisla = pd.DataFrame(cisla)
+        cisla.to_excel('filename.xlsx', index=False)
+
+    def b3_fcn(self, fig):
+        self.m2.figure = fig
+        fig.savefig('filename.png')
+
+    def slide1_fcn(self, data, channel, position):
+        self.position1 = position
+        self.data = data
+        self.my_channel = channel
+        position = self.slide1.value() ##win --> median filter
+        self.position1 = position
+        self.m2.rad3click(self.data, self.my_channel, self.position1)
+
+    def slide2_fcn(self, data, channel, position):
+        self.position2 = position
+        self.data = data
+        self.my_channel = channel
+        position = self.slide2.value() ##win --> exp. median filter
+        self.position2 = position
+        self.m2.rad4click(self.data, self.my_channel, self.position2)
+
+    def closeTab(self, i):
+        if self.tabs.count() < 2:
+            return
+
+        self.tabs.removeTab(i)
+
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=710, height=500):
@@ -300,6 +353,128 @@ class NewTabCanvas(FigureCanvas):
 
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
+
+    def rad1click(self, data_plt, channel):
+        # filtfilt - zero-phase filter
+        self.figure.clear()
+        self.my_channel = channel
+        self.data = data_plt
+
+        ax = self.figure.add_subplot(111)
+        ax.autoscale(enable=True, axis='x', tight=bool)
+
+        row = data_plt.shape[0]
+        col = data_plt.shape[1]
+        data_plt = data_plt[:, 7:col]
+
+        r = data_plt[:, channel]
+        s = np.arange(0, row, 1)
+
+        a = 1
+        n = 300
+        b = [1.0 / n] * n
+        f = signal.filtfilt(b, a, r)
+        ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
+        ax.plot(s, f, linewidth=2.0, c=[0.251, 0.878, 0.816])
+
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Intensity ()')
+
+        self.dat = f
+
+        self.draw()
+
+    def rad2click(self, data_plt, channel):
+        # Savitzky-Golay filter
+        self.figure.clear()
+        self.my_channel = channel
+        self.data = data_plt
+        ax = self.figure.add_subplot(111)
+        ax.autoscale(enable=True, axis='x', tight=bool)
+
+        row = data_plt.shape[0]
+        col = data_plt.shape[1]
+        data_plt = data_plt[:, 7:col]
+
+        r = data_plt[:, channel]
+        s = np.arange(0, row, 1)
+        sg = signal.savgol_filter(r, 501, 2)
+        ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
+        ax.plot(s, sg, linewidth=2.0, c=[0.196, 0.804, 0.196])
+
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Intensity ()')
+
+        self.dat = sg
+
+        self.draw()
+
+    def rad3click(self, data_plt, channel, win):
+        # median filter
+        self.figure.clear()
+        self.position1 = win
+        self.my_channel = channel
+        self.data = data_plt
+
+        ax = self.figure.add_subplot(111)
+        ax.autoscale(enable=True, axis='x', tight=bool)
+
+        row = data_plt.shape[0]
+        col = data_plt.shape[1]
+        data_plt = data_plt[:, 7:col]
+
+        r = data_plt[:, channel]
+        s = np.arange(0, row, 1)
+
+        mf = signal.medfilt(r, win)
+        ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
+        ax.plot(s, mf, linewidth=2.0, c=[1, 1, 0])
+
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Intensity ()')
+
+        self.dat = mf
+
+        self.draw()
+
+
+    def rad4click(self, data_plt, channel, alpha):
+        # exponential moving average
+
+        self.figure.clear()
+        self.my_channel = channel
+        self.data = data_plt
+        self.position2 = alpha
+
+        alpha = alpha/500
+        print(alpha)
+
+        ax = self.figure.add_subplot(111)
+        ax.autoscale(enable=True, axis='x', tight=bool)
+
+        row = data_plt.shape[0]
+        col = data_plt.shape[1]
+        data_plt = data_plt[:, 7:col]
+
+        r = data_plt[:, channel]
+        s = np.arange(0, row, 1)
+
+        aux = np.zeros(r.shape)
+
+        for idx, x in np.ndenumerate(r):
+            if idx[0] == 0:
+                aux[idx[0]] = x
+            else:
+                aux[idx[0]] = alpha * x + (1 - alpha) * aux[idx[0] - 1]
+
+
+        ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
+        ax.plot(s, aux, linewidth=2.0, c=[1, 0.078, 0.577])
+
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Intensity ()')
+
+        self.dat = aux
 
         self.draw()
 
