@@ -11,6 +11,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
+import csv
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -101,7 +102,7 @@ class App(QMainWindow):
 
     def file_fcn(self):
         options = QFileDialog.Options()
-        self.fileName, _ = QFileDialog.getOpenFileName(self, "Otevřít soubor - zpracování XRD dat", "",
+        self.fileName, _ = QFileDialog.getOpenFileName(self, "Open data file - XDR data processing", "",
                                                        "Data Files (*.dat);;All Files (*)", options=options)
         if self.fileName:
             self.data = np.genfromtxt(self.fileName)
@@ -120,6 +121,7 @@ class App(QMainWindow):
 
         self.my_channel = k
 
+    # ------- New tab config -----------
     def newTab_fcn(self, i):
 
         k = self.my_channel
@@ -181,18 +183,18 @@ class App(QMainWindow):
         self.slide2.valueChanged[int].connect(lambda: self.slide2_fcn(self.data, self.my_channel, \
                                                                       self.position2))
         self.b1 = QPushButton('Save data as .csv', self)
-        self.b1.setToolTip('Click to save data to .csv file')
+        self.b1.setToolTip('Click to save data to a text file')
         self.b1.move(510, 450)
         self.b1.resize(120, 27)
         self.b1.clicked.connect(lambda: self.b1_fcn(self.m2.dat))
 
         self.b2 = QPushButton('Save data as .xls', self)
-        self.b2.setToolTip('Click to save data to .xls file')
+        self.b2.setToolTip('Click to save data to MO Excel table')
         self.b2.move(510, 479)
         self.b2.resize(120, 27)
 
         self.b3 = QPushButton('Save chart as .png', self)
-        self.b3.setToolTip('Click to save chart as .png')
+        self.b3.setToolTip('Click to save chart as an image')
         self.b3.move(510, 508)
         self.b3.resize(120, 27)
         self.b3.clicked.connect(lambda: self.b3_fcn(self.m2.figure))
@@ -251,8 +253,23 @@ class App(QMainWindow):
         self.m2.twodee_plt(self.data, self.my_channel)
 
     def b1_fcn(self, cisla):
-        self.m2.dat = cisla
-        np.savetxt("filename.csv", cisla, delimiter=",")
+        try:
+            self.m2.dat
+        except NameError:
+            print("Process data first")
+        except ValueError:
+            print("")
+        else:
+            self.m2.dat = cisla
+
+        filename = input("Enter file name: ")
+        d = cisla.shape[0]
+        x = np.arange(0, d, 1)
+        print(d)
+        data = np.column_stack((x, cisla))
+        head = "Time (s), Intensity ()"
+        np.savetxt(filename, data, header=head)
+        print("ok5")
 
     def b2_fcn(self, cisla):
         self.m2.dat = cisla
@@ -267,7 +284,7 @@ class App(QMainWindow):
         self.position1 = position
         self.data = data
         self.my_channel = channel
-        position = self.slide1.value() ##win --> median filter
+        position = self.slide1.value()
         self.position1 = position
         self.m2.rad3click(self.data, self.my_channel, self.position1)
 
@@ -275,14 +292,13 @@ class App(QMainWindow):
         self.position2 = position
         self.data = data
         self.my_channel = channel
-        position = self.slide2.value() ##win --> exp. median filter
+        position = self.slide2.value()
         self.position2 = position
         self.m2.rad4click(self.data, self.my_channel, self.position2)
 
     def closeTab(self, i):
         if self.tabs.count() < 2:
             return
-
         self.tabs.removeTab(i)
 
 
@@ -312,7 +328,8 @@ class PlotCanvas(FigureCanvas):
 
         ax = self.figure.gca(projection='3d')
         x, y = np.meshgrid(x, y)
-        surf = ax.plot_surface(x, y, data_plt, cmap=cm.gist_stern, linewidth=0, antialiased=False, vmin=np.amin(data_plt), vmax=np.amax(data_plt))
+        surf = ax.plot_surface(x, y, data_plt, cmap=cm.gist_stern, linewidth=0, antialiased=False,\
+                               vmin=np.amin(data_plt), vmax=np.amax(data_plt))
 
         self.figure.colorbar(surf)
 
@@ -354,8 +371,9 @@ class NewTabCanvas(FigureCanvas):
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
 
+    # -------- filtfilt - zero-phase filter -----------
     def rad1click(self, data_plt, channel):
-        # filtfilt - zero-phase filter
+
         self.figure.clear()
         self.my_channel = channel
         self.data = data_plt
@@ -384,8 +402,9 @@ class NewTabCanvas(FigureCanvas):
 
         self.draw()
 
+    # ------------ Savitzky-Golay filter ------------
     def rad2click(self, data_plt, channel):
-        # Savitzky-Golay filter
+
         self.figure.clear()
         self.my_channel = channel
         self.data = data_plt
@@ -409,8 +428,9 @@ class NewTabCanvas(FigureCanvas):
 
         self.draw()
 
+    # ------------- median filter ---------------
     def rad3click(self, data_plt, channel, win):
-        # median filter
+
         self.figure.clear()
         self.position1 = win
         self.my_channel = channel
@@ -437,16 +457,15 @@ class NewTabCanvas(FigureCanvas):
 
         self.draw()
 
-
+    # ---------- exponential moving average -----------
     def rad4click(self, data_plt, channel, alpha):
-        # exponential moving average
 
         self.figure.clear()
         self.my_channel = channel
         self.data = data_plt
         self.position2 = alpha
 
-        alpha = alpha/500
+        alpha = alpha/800
         print(alpha)
 
         ax = self.figure.add_subplot(111)
@@ -466,7 +485,6 @@ class NewTabCanvas(FigureCanvas):
                 aux[idx[0]] = x
             else:
                 aux[idx[0]] = alpha * x + (1 - alpha) * aux[idx[0] - 1]
-
 
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
         ax.plot(s, aux, linewidth=2.0, c=[1, 0.078, 0.577])
