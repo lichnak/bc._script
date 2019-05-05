@@ -163,7 +163,7 @@ class App(QMainWindow):
         self.slide1.setMaximumWidth(110)
         self.slide1.setMinimum(11)
         self.slide1.setMaximum(501)
-        self.slide1.setToolTip('Window length')
+        self.slide1.setToolTip('Win length: '+str(self.position1))
         self.slide1.setSingleStep(20)
         self.slide1.setTickInterval(50)
         self.slide1.setTickPosition(QSlider.TicksBelow)
@@ -175,28 +175,24 @@ class App(QMainWindow):
         self.slide2.setMaximumWidth(110)
         self.slide2.setMinimum(1)
         self.slide2.setMaximum(99)
-        self.slide2.setToolTip('Parameter alpha')
+
         self.slide2.setSingleStep(1)
         self.slide2.setTickInterval(10)
         self.slide2.setTickPosition(QSlider.TicksBelow)
         self.slide2.setFocusPolicy(Qt.StrongFocus)
+        self.slide2.setToolTip('Alpha: '+str(self.position2/800))
         self.slide2.valueChanged[int].connect(lambda: self.slide2_fcn(self.data, self.my_channel, \
                                                                       self.position2))
         self.b1 = QPushButton('Save data as .csv', self)
         self.b1.setToolTip('Click to save data to a text file')
         self.b1.move(510, 450)
-        self.b1.resize(120, 27)
+        self.b1.resize(120, 54)
         self.b1.clicked.connect(lambda: self.b1_fcn(self.m2.dat))
-
-        self.b2 = QPushButton('Save data as .xls', self)
-        self.b2.setToolTip('Click to save data to MO Excel table')
-        self.b2.move(510, 479)
-        self.b2.resize(120, 27)
 
         self.b3 = QPushButton('Save chart as .png', self)
         self.b3.setToolTip('Click to save chart as an image')
         self.b3.move(510, 508)
-        self.b3.resize(120, 27)
+        self.b3.resize(120, 54)
         self.b3.clicked.connect(lambda: self.b3_fcn(self.m2.figure))
 
         self.layout1 = QHBoxLayout()
@@ -231,7 +227,7 @@ class App(QMainWindow):
         self.layout2.addWidget(self.slide2)
         self.layout3.addWidget(self.labelx)
         self.layout3.addWidget(self.b1)
-        self.layout3.addWidget(self.b2)
+        #self.layout3.addWidget(self.b2)
         self.layout3.addWidget(self.b3)
         self.layout4.addWidget(self.label0)
 
@@ -262,14 +258,16 @@ class App(QMainWindow):
         else:
             self.m2.dat = cisla
 
-        filename = input("Enter file name: ")
-        d = cisla.shape[0]
-        x = np.arange(0, d, 1)
-        print(d)
-        data = np.column_stack((x, cisla))
-        head = "Time (s), Intensity ()"
-        np.savetxt(filename, data, header=head)
-        print("ok5")
+        fileName, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
+                                                  "Data Files (*.csv);;All files (*)")
+        if fileName:
+            d = cisla.shape[0]
+            x = np.arange(0, d, 1)
+            data = np.column_stack((x, cisla))
+            head = "Time (s), Intensity ()"
+            np.savetxt(fileName, data, header=head, delimiter=',')
+        else:
+            print("Error: File not saved")
 
     def b2_fcn(self, cisla):
         self.m2.dat = cisla
@@ -278,7 +276,12 @@ class App(QMainWindow):
 
     def b3_fcn(self, fig):
         self.m2.figure = fig
-        fig.savefig('filename.png')
+        fileName, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
+                                                  "(*.jpg);;(*.png);;(*.tiff);;All files (*)")
+        if fileName:
+            fig.savefig(fname=fileName)
+        else:
+            print("Error: File not saved")
 
     def slide1_fcn(self, data, channel, position):
         self.position1 = position
@@ -287,6 +290,7 @@ class App(QMainWindow):
         position = self.slide1.value()
         self.position1 = position
         self.m2.rad3click(self.data, self.my_channel, self.position1)
+        self.slide1.setToolTip('Win length: '+str(self.position1))
 
     def slide2_fcn(self, data, channel, position):
         self.position2 = position
@@ -295,6 +299,7 @@ class App(QMainWindow):
         position = self.slide2.value()
         self.position2 = position
         self.m2.rad4click(self.data, self.my_channel, self.position2)
+        self.slide2.setToolTip('Alpha: '+str(position/800))
 
     def closeTab(self, i):
         if self.tabs.count() < 2:
@@ -466,7 +471,6 @@ class NewTabCanvas(FigureCanvas):
         self.position2 = alpha
 
         alpha = alpha/800
-        print(alpha)
 
         ax = self.figure.add_subplot(111)
         ax.autoscale(enable=True, axis='x', tight=bool)
