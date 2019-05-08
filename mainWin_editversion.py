@@ -125,8 +125,8 @@ class App(QMainWindow):
     def newTab_fcn(self, i):
 
         k = self.my_channel
-        self.position1 = 101
-        self.position2 = 99
+        self.position1 = 21
+        self.position2 = -99
 
         self.tab = QWidget()
         self.tabs.addTab(self.tab, "Theta:  "+str(k)+" °")
@@ -138,6 +138,10 @@ class App(QMainWindow):
 
         self.m2 = NewTabCanvas(self, 710, 450)
         self.m2.move(15, 40)
+
+        self.tabtools = NavigationToolbar(self.m2, self)
+        #self.tabtools.move(15, 500)
+        #self.tabtools.resize(400, 30)
 
         self.label0 = QLabel('Select data filter and its parameters', self)
         self.label0.resize(250, 26)
@@ -173,14 +177,15 @@ class App(QMainWindow):
         self.slide2 = QSlider(Qt.Horizontal)
         self.slide2.move(300, 472)
         self.slide2.setMaximumWidth(110)
-        self.slide2.setMinimum(1)
-        self.slide2.setMaximum(99)
+        self.slide2.setMinimum(-99)
+        self.slide2.setMaximum(-1)
 
         self.slide2.setSingleStep(1)
         self.slide2.setTickInterval(10)
         self.slide2.setTickPosition(QSlider.TicksBelow)
         self.slide2.setFocusPolicy(Qt.StrongFocus)
-        self.slide2.setToolTip('Alpha: '+str(self.position2/800))
+        self.slide2.setValue(self.position2)
+        self.slide2.setToolTip('Alpha: '+str(-(self.position2/800)))
         self.slide2.valueChanged[int].connect(lambda: self.slide2_fcn(self.data, self.my_channel, \
                                                                       self.position2))
         self.b1 = QPushButton('Save data as .csv', self)
@@ -210,14 +215,17 @@ class App(QMainWindow):
         self.widget3.setLayout(self.layout3)
         self.widget4.setLayout(self.layout4)
 
-        self.widget1.resize(440, 35)
-        self.widget1.move(10, 440)
-        self.widget2.resize(440, 35)
-        self.widget2.move(10, 468)
-        self.widget3.move(520, 450)
-        self.widget3.resize(120, 90)
-        self.widget4.move(15, 412)
-        self.widget4.resize(720, 27)
+        #self.widget1.resize(440, 35)
+        #self.widget1.move(10, 440)
+        #self.widget1.setMaximumHeight(50)
+        #self.widget2.resize(440, 35)
+        #self.widget2.move(10, 468)
+        #self.widget2.setMaximumHeight(70)
+        #self.widget3.move(520, 450)
+        #self.widget3.resize(120, 90)
+        #self.widget4.move(15, 412)
+        #self.widget4.resize(720, 27)
+        #self.widget2.setMaximumHeight(25)
 
         self.layout1.addWidget(self.rad1)
         self.layout2.addWidget(self.rad2)
@@ -227,7 +235,6 @@ class App(QMainWindow):
         self.layout2.addWidget(self.slide2)
         self.layout3.addWidget(self.labelx)
         self.layout3.addWidget(self.b1)
-        #self.layout3.addWidget(self.b2)
         self.layout3.addWidget(self.b3)
         self.layout4.addWidget(self.label0)
 
@@ -238,12 +245,13 @@ class App(QMainWindow):
         self.group.addButton(self.rad4)
 
         self.tab.layout = QGridLayout(self)
-        self.tab.layout.setSpacing(7)
+        self.tab.layout.setSpacing(5)
         self.tab.layout.addWidget(self.m2, 1, 0, 4, 2)
         self.tab.layout.addWidget(self.widget1, 6, 0)
         self.tab.layout.addWidget(self.widget2, 7, 0)
         self.tab.layout.addWidget(self.widget4, 5, 0)
         self.tab.layout.addWidget(self.widget3, 5, 1, 3, 1)
+        self.tab.layout.addWidget(self.tabtools, 8, 0, 1, 2)
         self.tab.setLayout(self.tab.layout)
 
         self.m2.twodee_plt(self.data, self.my_channel)
@@ -277,11 +285,17 @@ class App(QMainWindow):
     def b3_fcn(self, fig):
         self.m2.figure = fig
         fileName, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
-                                                  "(*.jpg);;(*.png);;(*.tiff);;All files (*)")
-        if fileName:
-            fig.savefig(fname=fileName)
-        else:
+                                                  "Image files (*.jpg);;Portable Graphics (*.png)"
+                                                  ";;Vector Graphics (*.svg);;PDF files (*.pdf);;All Files (*)")
+        print(fileName)
+        suffix = fileName[-3:]
+        print(suffix)
+
+        if not fileName:
             print("Error: File not saved")
+        if fileName:
+            fig.savefig(fname=fileName, format=suffix, metadata=suffix)
+
 
     def slide1_fcn(self, data, channel, position):
         self.position1 = position
@@ -299,7 +313,7 @@ class App(QMainWindow):
         position = self.slide2.value()
         self.position2 = position
         self.m2.rad4click(self.data, self.my_channel, self.position2)
-        self.slide2.setToolTip('Alpha: '+str(position/800))
+        self.slide2.setToolTip('Alpha: '+str(-(position/800)))
 
     def closeTab(self, i):
         if self.tabs.count() < 2:
@@ -394,8 +408,10 @@ class NewTabCanvas(FigureCanvas):
         s = np.arange(0, row, 1)
 
         a = 1
-        n = 300
-        b = [1.0 / n] * n
+        n = 50
+        b = [1.0/n]*n
+        print(b)
+
         f = signal.filtfilt(b, a, r)
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
         ax.plot(s, f, linewidth=2.0, c=[0.251, 0.878, 0.816])
@@ -422,7 +438,7 @@ class NewTabCanvas(FigureCanvas):
 
         r = data_plt[:, channel]
         s = np.arange(0, row, 1)
-        sg = signal.savgol_filter(r, 501, 2)
+        sg = signal.savgol_filter(r, 301, 5)
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
         ax.plot(s, sg, linewidth=2.0, c=[0.196, 0.804, 0.196])
 
@@ -470,7 +486,7 @@ class NewTabCanvas(FigureCanvas):
         self.data = data_plt
         self.position2 = alpha
 
-        alpha = alpha/800
+        alpha = -(alpha/800)
 
         ax = self.figure.add_subplot(111)
         ax.autoscale(enable=True, axis='x', tight=bool)
