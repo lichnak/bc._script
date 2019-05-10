@@ -500,11 +500,11 @@ class NewTabCanvas(FigureCanvas):
 
         aux = np.zeros(r.shape)
 
-        for idx, x in np.ndenumerate(r):
+        for idx, a in np.ndenumerate(r):
             if idx[0] == 0:
-                aux[idx[0]] = x
+                aux[idx[0]] = a
             else:
-                aux[idx[0]] = alpha * x + (1 - alpha) * aux[idx[0] - 1]
+                aux[idx[0]] = alpha * a + (1 - alpha) * aux[idx[0] - 1]
 
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
         ax.plot(s, aux, linewidth=2.0, c=[1, 0.078, 0.577])
