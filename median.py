@@ -28,7 +28,7 @@ for i in range(len(x)):
         a = y[i:b]
         q[i] = np.median(a)
 
-plt.plot(x, q, linewidth=1, label='mujmedian', color='forestgreen')
+plt.plot(x, q, linewidth=1, label='mujmedian', color='green')
 
 # vestavena funkce medfilt()
 z = signal.medfilt(y, win)
