@@ -215,18 +215,6 @@ class App(QMainWindow):
         self.widget3.setLayout(self.layout3)
         self.widget4.setLayout(self.layout4)
 
-        #self.widget1.resize(440, 35)
-        #self.widget1.move(10, 440)
-        #self.widget1.setMaximumHeight(50)
-        #self.widget2.resize(440, 35)
-        #self.widget2.move(10, 468)
-        #self.widget2.setMaximumHeight(70)
-        #self.widget3.move(520, 450)
-        #self.widget3.resize(120, 90)
-        #self.widget4.move(15, 412)
-        #self.widget4.resize(720, 27)
-        #self.widget2.setMaximumHeight(25)
-
         self.layout1.addWidget(self.rad1)
         self.layout2.addWidget(self.rad2)
         self.layout1.addWidget(self.rad3)
