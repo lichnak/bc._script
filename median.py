@@ -24,7 +24,7 @@ for i in range(len(x)):
     elif i == len(x)-1:
         q[i] = 0
     else:
-        b = (i+win)-1
+        b = i+win
         a = y[i:b]
         q[i] = np.median(a)
 
