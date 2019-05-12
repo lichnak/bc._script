@@ -20,9 +20,7 @@ from scipy import signal
 
 
 class App(QMainWindow):
-
     #  -------------- main window initialization ---------------
-
     def __init__(self):
         super().__init__()
         self.left = 10
@@ -53,7 +51,6 @@ class App(QMainWindow):
         self.initUI()
 
     #  ------------ main tab & window configuration -------------
-
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
@@ -106,7 +103,6 @@ class App(QMainWindow):
         self.show()
 
     #  --------- load data from file (open file button) ------------
-
     def file_fcn(self):
         options = QFileDialog.Options()
         self.fileName, _ = QFileDialog.getOpenFileName(self, "Open data file - XDR data processing", "",
@@ -120,7 +116,6 @@ class App(QMainWindow):
             print("Error: File not selected")
 
     #  -------------- channel ---------------
-
     def btn_fcn(self):
         try:
             k = int(self.kanal.text())
@@ -131,7 +126,6 @@ class App(QMainWindow):
         self.my_channel = k
 
     #  -------------- New tab configuration ---------------
-
     def newTab_fcn(self, i):
 
         k = self.my_channel
@@ -150,8 +144,6 @@ class App(QMainWindow):
         self.m2.move(15, 40)
 
         self.tabtools = NavigationToolbar(self.m2, self)
-        #self.tabtools.move(15, 500)
-        #self.tabtools.resize(400, 30)
 
         self.label0 = QLabel('Select data filter and its parameters', self)
         self.label0.resize(250, 26)
@@ -181,7 +173,7 @@ class App(QMainWindow):
         self.slide1.setSingleStep(20)
         self.slide1.setTickInterval(50)
         self.slide1.setTickPosition(QSlider.TicksBelow)
-        #self.slide1.setFocusPolicy(Qt.StrongFocus)
+        self.slide1.setFocusPolicy(Qt.StrongFocus)
         self.slide1.valueChanged[int].connect(lambda: self.slide1_fcn(self.data, self.my_channel, \
                                                                       self.position1))
         self.slide2 = QSlider(Qt.Horizontal)
@@ -255,7 +247,6 @@ class App(QMainWindow):
         self.m2.twodee_plt(self.data, self.my_channel)
 
     #  -------------- export data to files functions ---------------
-
     def b1_fcn(self, cisla):
         try:
             self.m2.dat
@@ -292,7 +283,6 @@ class App(QMainWindow):
             fig.savefig(fname=fileName, format=suffix, metadata=suffix)
 
     #  -------------- median filter slider ---------------
-
     def slide1_fcn(self, data, channel, position):
         self.position1 = position
         self.data = data
@@ -303,7 +293,6 @@ class App(QMainWindow):
         self.slide1.setToolTip('Win length: '+str(self.position1))
 
     #  -------------- exponential smoothing slider ---------------
-
     def slide2_fcn(self, data, channel, position):
         self.position2 = position
         self.data = data
@@ -318,9 +307,8 @@ class App(QMainWindow):
             return
         self.tabs.removeTab(i)
 
+
 #  -------------- figure canvas for the main tab ---------------
-
-
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=710, height=500):
         fig = Figure(figsize=(710, 500))
@@ -358,9 +346,8 @@ class PlotCanvas(FigureCanvas):
 
         self.draw()
 
+
 #  -------------- figure canvas for newly open tabs ---------------
-
-
 class NewTabCanvas(FigureCanvas):
     def __init__(self, parent=None, width=710, height=500):
         fig2 = Figure(figsize=(710, 500))
