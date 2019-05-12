@@ -15,23 +15,30 @@ ax.xaxis.set_label_coords(0.98, -0.05)
 plt.xlabel('t')
 plt.ylabel('f(t)')
 win = int(input('Enter window size:'))
-
 # muj median
 for i in range(len(x)):
-    print(i)
-    if i == 0:
-        q[i] = 0
-    elif i == len(x)-1:
-        q[i] = 0
-    else:
-        b = i+win
-        a = y[i:b]
+    if i < ((win-1)//2):
+        zero1 = np.zeros((win-1-i)//2, dtype=int)
+        a = np.concatenate((zero1, y[i]), axis=None)
+        #print("a: "+str(a))
         q[i] = np.median(a)
+    elif (i+((win-1)//2)) > (len(x)-1):
+        zero2 = np.zeros((i-win-1)//2, dtype=int)
+        b = np.concatenate((y[i], zero2), axis=None)
+        #print("b: " + str(b))
+        q[i] = np.median(b)
+    else:
+        c = y[i-((win-1)//2):(i+((win+1)//2))]
+        print("y_i="+str(y[i]))
+        print("c: " + str(c))
+        q[i] = np.median(c)
+
 
 plt.plot(x, q, linewidth=1, label='mujmedian', color='green')
 
 # vestavena funkce medfilt()
 z = signal.medfilt(y, win)
+
 plt.plot(x, z, linewidth=0.8, color='orangered', label='medfilt')
 plt.legend()
 
