@@ -458,13 +458,16 @@ class NewTabCanvas(FigureCanvas):
         mf = signal.medfilt(r, win)
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
         ax.plot(s, mf, linewidth=2.0, c=[1, 1, 0])
-
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
 
         self.dat = mf
 
         self.draw()
+
+    # ------------------- %%% ----------------------
+    # mujmedian ... TADY
+    # ------------------- %%% ----------------------
 
     # ---------- exponential moving average -----------
     def rad4click(self, data_plt, channel, alpha):
