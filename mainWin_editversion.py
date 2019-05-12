@@ -455,19 +455,37 @@ class NewTabCanvas(FigureCanvas):
         r = data_plt[:, channel]
         s = np.arange(0, row, 1)
 
-        mf = signal.medfilt(r, win)
+        #  ------------------- %%% ----------------------
+        #  muj median
+        mf = np.zeros(len(s))
+        for i in range(len(s)):
+            k = (win - 1) // 2
+            q = r[i + 1:((i + 1) + k)]
+            n = r[(i - k):i]
+            if i < k:  # left boundaries
+                zero1 = np.zeros(k - i, dtype=int)
+                a = np.concatenate((zero1, r[:i + 1], q), axis=None)
+                mf[i] = np.median(a)
+            elif (i + ((win - 1) // 2)) > (len(s) - 1):  # right boundaries
+                p = k - ((len(s) - 1) - i)
+                zero2 = np.zeros(p, dtype=int)
+                b = np.concatenate((n, r[i:], zero2), axis=None)
+                mf[i] = np.median(b)
+            else:  # middle data
+                c = r[i - ((win - 1) // 2):(i + ((win + 1) // 2))]
+                mf[i] = np.median(c)
+        # ------------------- %%% ----------------------
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
         ax.plot(s, mf, linewidth=2.0, c=[1, 1, 0])
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
 
+        # err = mf - q
+        # print("Median err:", err)
+
         self.dat = mf
 
         self.draw()
-
-    # ------------------- %%% ----------------------
-    # mujmedian ... TADY
-    # ------------------- %%% ----------------------
 
     # ---------- exponential moving average -----------
     def rad4click(self, data_plt, channel, alpha):
