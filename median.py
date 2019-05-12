@@ -17,21 +17,27 @@ plt.ylabel('f(t)')
 win = int(input('Enter window size:'))
 # muj median
 for i in range(len(x)):
-    if i < ((win-1)//2):
-        zero1 = np.zeros((win-1-i)//2, dtype=int)
-        a = np.concatenate((zero1, y[i]), axis=None)
-        #print("a: "+str(a))
+    k = (win - 1) // 2
+    m = y[i + 1:((i + 1) + k)]
+    n = y[(i-k):i]
+    if i < k:
+        # ----- correct -------
+        zero1 = np.zeros(k-i, dtype=int)
+        a = np.concatenate((zero1, y[:i+1], m), axis=None)
         q[i] = np.median(a)
+        # ---------------------
     elif (i+((win-1)//2)) > (len(x)-1):
-        zero2 = np.zeros((i-win-1)//2, dtype=int)
-        b = np.concatenate((y[i], zero2), axis=None)
-        #print("b: " + str(b))
+        # ----- correct -------
+        p = k-((len(x)-1)-i)
+        zero2 = np.zeros(p, dtype=int)
+        b = np.concatenate((n, y[i:], zero2), axis=None)
         q[i] = np.median(b)
+        # ---------------------
     else:
+        # ----- correct -------
         c = y[i-((win-1)//2):(i+((win+1)//2))]
-        print("y_i="+str(y[i]))
-        print("c: " + str(c))
         q[i] = np.median(c)
+        # ---------------------
 
 
 plt.plot(x, q, linewidth=1, label='mujmedian', color='green')
