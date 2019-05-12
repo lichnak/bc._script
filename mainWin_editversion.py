@@ -20,6 +20,9 @@ from scipy import signal
 
 
 class App(QMainWindow):
+
+    #  -------------- main window initialization ---------------
+
     def __init__(self):
         super().__init__()
         self.left = 10
@@ -48,6 +51,8 @@ class App(QMainWindow):
         self.setStyleSheet("QMainWindow { background-color: rgb(253, 253, 253) }")
 
         self.initUI()
+
+    #  ------------ main tab & window configuration -------------
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -100,6 +105,8 @@ class App(QMainWindow):
 
         self.show()
 
+    #  --------- load data from file (open file button) ------------
+
     def file_fcn(self):
         options = QFileDialog.Options()
         self.fileName, _ = QFileDialog.getOpenFileName(self, "Open data file - XDR data processing", "",
@@ -112,6 +119,8 @@ class App(QMainWindow):
         else:
             print("Error: File not selected")
 
+    #  -------------- channel ---------------
+
     def btn_fcn(self):
         try:
             k = int(self.kanal.text())
@@ -121,7 +130,8 @@ class App(QMainWindow):
 
         self.my_channel = k
 
-    # ------- New tab config -----------
+    #  -------------- New tab configuration ---------------
+
     def newTab_fcn(self, i):
 
         k = self.my_channel
@@ -244,6 +254,8 @@ class App(QMainWindow):
 
         self.m2.twodee_plt(self.data, self.my_channel)
 
+    #  -------------- export data to files functions ---------------
+
     def b1_fcn(self, cisla):
         try:
             self.m2.dat
@@ -265,11 +277,6 @@ class App(QMainWindow):
         else:
             print("Error: File not saved")
 
-    def b2_fcn(self, cisla):
-        self.m2.dat = cisla
-        cisla = pd.DataFrame(cisla)
-        cisla.to_excel('filename.xlsx', index=False)
-
     def b3_fcn(self, fig):
         self.m2.figure = fig
         fileName, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
@@ -284,6 +291,7 @@ class App(QMainWindow):
         if fileName:
             fig.savefig(fname=fileName, format=suffix, metadata=suffix)
 
+    #  -------------- median filter slider ---------------
 
     def slide1_fcn(self, data, channel, position):
         self.position1 = position
@@ -293,6 +301,8 @@ class App(QMainWindow):
         self.position1 = position
         self.m2.rad3click(self.data, self.my_channel, self.position1)
         self.slide1.setToolTip('Win length: '+str(self.position1))
+
+    #  -------------- exponential smoothing slider ---------------
 
     def slide2_fcn(self, data, channel, position):
         self.position2 = position
@@ -307,6 +317,8 @@ class App(QMainWindow):
         if self.tabs.count() < 2:
             return
         self.tabs.removeTab(i)
+
+#  -------------- figure canvas for the main tab ---------------
 
 
 class PlotCanvas(FigureCanvas):
@@ -345,6 +357,8 @@ class PlotCanvas(FigureCanvas):
         ax.set_zlabel('Intensity ()')
 
         self.draw()
+
+#  -------------- figure canvas for newly open tabs ---------------
 
 
 class NewTabCanvas(FigureCanvas):
@@ -455,8 +469,6 @@ class NewTabCanvas(FigureCanvas):
         r = data_plt[:, channel]
         s = np.arange(0, row, 1)
 
-        #  ------------------- %%% ----------------------
-        #  muj median
         mf = np.zeros(len(s))
         for i in range(len(s)):
             k = (win - 1) // 2
@@ -474,7 +486,7 @@ class NewTabCanvas(FigureCanvas):
             else:  # middle data
                 c = r[i - ((win - 1) // 2):(i + ((win + 1) // 2))]
                 mf[i] = np.median(c)
-        # ------------------- %%% ----------------------
+
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
         ax.plot(s, mf, linewidth=2.0, c=[1, 1, 0])
         ax.set_xlabel('Time (s)')
