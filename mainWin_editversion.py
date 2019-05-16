@@ -461,14 +461,13 @@ class NewTabCanvas(FigureCanvas):
             k = (win - 1) // 2
             q = r[i + 1:((i + 1) + k)]
             n = r[(i - k):i]
+            u = r[i + 1:i + (k - i) + 1]
             if i < k:  # left boundaries
-                zero1 = np.zeros(k - i, dtype=int)
-                a = np.concatenate((zero1, r[:i + 1], q), axis=None)
+                a = np.concatenate((u[::-1], r[:i + 1], q), axis=None)
                 mf[i] = np.median(a)
             elif (i + ((win - 1) // 2)) > (len(s) - 1):  # right boundaries
-                p = k - ((len(s) - 1) - i)
-                zero2 = np.zeros(p, dtype=int)
-                b = np.concatenate((n, r[i:], zero2), axis=None)
+                p = r[i - k:i - (len(s) - 1 - i)]
+                b = np.concatenate((n, r[i:], p[::-1]), axis=None)
                 mf[i] = np.median(b)
             else:  # middle data
                 c = r[i - ((win - 1) // 2):(i + ((win + 1) // 2))]
@@ -478,10 +477,6 @@ class NewTabCanvas(FigureCanvas):
         ax.plot(s, mf, linewidth=2.0, c=[1, 1, 0])
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
-
-        # err = mf - q
-        # print("Median err:", err)
-
         self.dat = mf
 
         self.draw()
