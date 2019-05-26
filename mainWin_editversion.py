@@ -273,14 +273,11 @@ class App(QMainWindow):
         fileName, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
                                                   "Image files (*.jpg);;Portable Graphics (*.png)"
                                                   ";;Vector Graphics (*.svg);;PDF files (*.pdf);;All Files (*)")
-        print(fileName)
         suffix = fileName[-3:]
-        print(suffix)
-
         if not fileName:
             print("Error: File not saved")
         if fileName:
-            fig.savefig(fname=fileName, format=suffix, metadata=suffix)
+            fig.savefig(fname=fileName, format=suffix)
 
     #  -------------- median filter slider ---------------
     def slide1_fcn(self, data, channel, position):
@@ -399,7 +396,6 @@ class NewTabCanvas(FigureCanvas):
         a = 1
         n = 50
         b = [1.0/n]*n
-        print(b)
 
         f = signal.filtfilt(b, a, r)
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
