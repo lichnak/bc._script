@@ -190,13 +190,13 @@ class App(QMainWindow):
         self.slide2.setToolTip('Alpha: '+str(-(self.position2/800)))
         self.slide2.valueChanged[int].connect(lambda: self.slide2_fcn(self.data, self.my_channel, \
                                                                       self.position2))
-        self.b1 = QPushButton('Save data as .csv', self)
+        self.b1 = QPushButton('Export data', self)
         self.b1.setToolTip('Click to save data to a text file')
         self.b1.move(510, 450)
         self.b1.resize(120, 54)
         self.b1.clicked.connect(lambda: self.b1_fcn(self.m2.dat))
 
-        self.b3 = QPushButton('Save chart as .png', self)
+        self.b3 = QPushButton('Save chart', self)
         self.b3.setToolTip('Click to save chart as an image')
         self.b3.move(510, 508)
         self.b3.resize(120, 54)
@@ -506,7 +506,7 @@ class NewTabCanvas(FigureCanvas):
                 aux[idx[0]] = alpha * a + (1 - alpha) * aux[idx[0] - 1]
 
         ax.plot(s, r, linewidth=0.5, c=[0.80, 0, 0.2])
-        ax.plot(s, aux, linewidth=2.0, c=[1, 0.078, 0.577])
+        ax.plot(s, aux, linewidth=2.0, c=[1, 0, 0])
 
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Intensity ()')
